@@ -5,31 +5,31 @@ import network.packet.DataPacket;
 import network.packet.PacketDecoder;
 import network.packet.PacketEncoder;
 
-public class LoginStatusPacket extends DataPacket implements Clientbound {
+public class PlayerInitializedPacket extends DataPacket implements Clientbound {
 
-	public static final int REQUEST_PROTOCOL = 0;
-	public static final int REQUEST_CLIENT_INFO = 1;
-	public static final int FINISH = 16;
+	public int runtimeId;
 
-	public int status;
+	public String name;
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.status = in.readInt();
+		this.runtimeId = in.readInt();
+		this.name = in.readString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeInt(this.status);
+		out.writeInt(this.runtimeId);
+		out.writeString(this.name);
 	}
 
 	@Override
 	public String getName() {
-		return "LoginStatusPacket";
+		return "PlayerInitializedPacket";
 	}
 
 	@Override
 	public ProtocolIds getProtocolId() {
-		return ProtocolIds.LOGIN_STATUS_PACKET;
+		return ProtocolIds.PLAYER_INITIALIZED_PACKET;
 	}
 }

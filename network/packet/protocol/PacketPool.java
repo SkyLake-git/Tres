@@ -16,11 +16,19 @@ public class PacketPool {
 		this.pool = new HashMap<Integer, DataPacket>();
 
 		this.register(new TextPacket());
+		this.register(new DisconnectPacket());
+		this.register(new AliveSignalPacket());
+		this.register(new LoginStatusPacket());
+		this.register(new ProtocolPacket());
+		this.register(new ClientInfoPacket());
+		this.register(new PlayerInfoRequestPacket());
+		this.register(new PlayerInitializedPacket());
 	}
 
 	public void register(DataPacket packet) {
 		try {
-			this.pool.put(packet.NETWORK_ID.id, packet.clone());
+			// System.out.println("Packet Registered: ID: " + packet.clone().getProtocolId().id + " Packet: " + packet.getName());
+			this.pool.put(packet.getProtocolId().id, packet.clone());
 		} catch (CloneNotSupportedException e) {
 
 		}

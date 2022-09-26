@@ -1,35 +1,34 @@
 package network.packet.protocol;
 
-import network.packet.Clientbound;
 import network.packet.DataPacket;
 import network.packet.PacketDecoder;
 import network.packet.PacketEncoder;
+import network.packet.Serverbound;
 
-public class LoginStatusPacket extends DataPacket implements Clientbound {
+public class ProtocolPacket extends DataPacket implements Serverbound {
 
-	public static final int REQUEST_PROTOCOL = 0;
-	public static final int REQUEST_CLIENT_INFO = 1;
-	public static final int FINISH = 16;
-
-	public int status;
+	public int protocol = ProtocolIds.PROTOCOL;
+	public int version = ProtocolIds.VERSION;
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.status = in.readInt();
+		this.protocol = in.readInt();
+		this.version = in.readInt();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeInt(this.status);
+		out.writeInt(this.protocol);
+		out.writeInt(this.version);
 	}
 
 	@Override
 	public String getName() {
-		return "LoginStatusPacket";
+		return "ProtocolPacket";
 	}
 
 	@Override
 	public ProtocolIds getProtocolId() {
-		return ProtocolIds.LOGIN_STATUS_PACKET;
+		return ProtocolIds.PROTOCOL_PACKET;
 	}
 }

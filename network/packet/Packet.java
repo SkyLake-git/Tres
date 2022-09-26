@@ -1,5 +1,7 @@
 package network.packet;
 
+import network.packet.protocol.ProtocolIds;
+
 public interface Packet {
 
 	String getName();
@@ -7,4 +9,6 @@ public interface Packet {
 	void encode(PacketEncoder out);
 
 	void decode(PacketDecoder in);
+
+	ProtocolIds getProtocolId();
 }

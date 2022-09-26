@@ -58,7 +58,7 @@ public class PacketSender {
 			byte[] buffer = out.getByteArrayOutputStream().toByteArray();
 			output.write(buffer);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			e.printStackTrace();
 		}
 	}
 

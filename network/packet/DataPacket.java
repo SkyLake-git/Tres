@@ -1,12 +1,8 @@
 package network.packet;
 
-import network.packet.protocol.ProtocolIds;
-
 import java.io.IOException;
 
 abstract public class DataPacket implements Packet, Cloneable {
-
-	public final ProtocolIds NETWORK_ID = ProtocolIds.UNKNOWN;
 
 
 	@Override
@@ -24,7 +20,7 @@ abstract public class DataPacket implements Packet, Cloneable {
 		try {
 			short header = in.getStream().readShort();
 			int pid = header;
-			if (pid != NETWORK_ID.id) {
+			if (pid != this.getProtocolId().id) {
 				throw new RuntimeException();
 			}
 		} catch (IOException e) {
@@ -46,7 +42,7 @@ abstract public class DataPacket implements Packet, Cloneable {
 
 	protected void encodeHeader(PacketEncoder out) {
 		try {
-			out.getStream().writeShort(NETWORK_ID.id);
+			out.getStream().writeShort(this.getProtocolId().id);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

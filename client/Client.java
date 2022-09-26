@@ -2,24 +2,21 @@ package client;
 
 import network.packet.Clientbound;
 import network.packet.DataPacket;
-import network.packet.PacketSender;
 import network.packet.protocol.PacketPool;
-import network.packet.protocol.TextPacket;
 import utils.Colors;
+import utils.Heartbeat;
 import utils.MainLogger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
-public class Client {
+public class Client implements Heartbeat.Syncable {
 
 	protected Socket socket;
 
-	protected ClientHeartbeat heartbeat;
+	protected Heartbeat heartbeat;
 
-	protected PacketSender sender;
 
 	protected MainLogger logger;
 
@@ -29,37 +26,59 @@ public class Client {
 
 	protected int tick;
 
+	protected boolean isClosed;
+	protected boolean isRunning;
+
+	protected ClientSession session;
+
 	Client() {
 		try {
-			this.socket = new Socket();
-			this.socket.connect(new InetSocketAddress("127.0.0.1", 34560));
+			this.socket = null;
 
-			this.heartbeat = new ClientHeartbeat(this, 20);
-
-			this.sender = new PacketSender(this.socket);
+			this.heartbeat = new Heartbeat(20);
+			this.heartbeat.getList().add(this);
 
 			this.logger = new MainLogger("Client");
 
 			this.packetPool = new PacketPool();
 
-			this.listener = new ServerListener(this, this.socket);
+			this.listener = null;
 
 			this.tick = 0;
 
-			this.heartbeat.start();
-			this.listener.start();
+			this.isClosed = false;
+			this.isRunning = false;
+
+			this.session = null;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
 	}
 
-	public Socket getSocket() {
-		return socket;
+	public void start(InetSocketAddress address) throws IOException {
+		if (!this.heartbeat.isAlive()) {
+			this.socket = new Socket();
+			this.socket.connect(address);
+
+			try {
+				this.listener = new ServerListener(this, this.socket);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
+			this.session = new ClientSession(this);
+
+
+			this.isRunning = true;
+
+			this.heartbeat.start();
+			this.listener.start();
+		}
 	}
 
-	public PacketSender getSender() {
-		return sender;
+	public Socket getSocket() {
+		return socket;
 	}
 
 	public MainLogger getLogger() {
@@ -74,27 +93,36 @@ public class Client {
 		return tick;
 	}
 
-	void close() {
-		this.logger.info(Colors.wrap("Closing client...", Colors.YELLOW_BOLD_BRIGHT));
-		this.sender.close(false);
-		this.listener.interrupt();
-		this.logger.info("Interrupted ServerListener");
-		this.heartbeat.interrupt();
-		this.logger.info("Interrupted ClientHeartbeat");
-		try {
-			this.socket.close();
-			this.logger.info("Closing socket");
-		} catch (IOException e) {
-			this.logger.warning("Failed to close socket");
-		}
+	public boolean isClosed() {
+		return isClosed;
+	}
 
-		this.logger.info(Colors.wrap("Successfully closed client", Colors.BLUE_BRIGHT));
-
+	private void closeCleanup() {
 
 	}
 
+	public void close() {
+		if (this.isClosed || !this.isRunning) {
+			return;
+		}
+
+		this.logger.info(Colors.wrap("Closing client...", Colors.YELLOW_BOLD_BRIGHT));
+		this.listener.interrupt();
+		this.logger.info("Interrupted ServerListener");
+		this.heartbeat.interrupt();
+		this.logger.info("Interrupted heartbeat");
+
+		this.session.close();
+		this.isRunning = false;
+
+		this.logger.info(Colors.wrap("Successfully closed client", Colors.BLUE_BRIGHT));
+		this.isClosed = true;
+
+		this.closeCleanup();
+	}
+
 	void onReceiveRaw(byte[] data) {
-		this.logger.info("Received: " + new String(data, StandardCharsets.UTF_8));
+		// this.logger.info("Received: " + new String(data, StandardCharsets.UTF_8));
 
 		DataPacket packet = this.packetPool.getPacketFull(data);
 		if (packet != null) {
@@ -107,21 +135,13 @@ public class Client {
 			this.logger.info("Invalid packet received: " + packet.getName());
 		}
 
-		this.logger.info("Packet Success: " + packet.getName());
+		this.session.handlePacket(packet);
 	}
 
-	void tick() {
+	public void tick() {
 		this.tick++;
-		this.sender.tick();
 
-		if (this.tick % 40 == 0) {
-			TextPacket packet = new TextPacket();
-			packet.message = "Hello";
-			packet.sourceName = "Yeet";
-
-			this.sender.sendPacket(packet);
-		}
-
+		this.session.tick();
 	}
 
 }

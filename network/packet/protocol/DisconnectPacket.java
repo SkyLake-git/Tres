@@ -4,7 +4,7 @@ import network.packet.*;
 
 public class DisconnectPacket extends DataPacket implements Clientbound, Serverbound {
 
-	String reason = "";
+	public String reason = "";
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
@@ -19,5 +19,10 @@ public class DisconnectPacket extends DataPacket implements Clientbound, Serverb
 	@Override
 	public String getName() {
 		return "DisconnectPacket";
+	}
+
+	@Override
+	public ProtocolIds getProtocolId() {
+		return ProtocolIds.DISCONNECT_PACKET;
 	}
 }

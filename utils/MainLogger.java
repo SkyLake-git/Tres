@@ -20,7 +20,7 @@ public class MainLogger {
 	}
 
 	public void emergency(String message) {
-		this.send(message, "EMERGENCY", Colors.RED_BACKGROUND);
+		this.send(message, "EMERGENCY", Colors.RED_BRIGHT);
 	}
 
 	protected void send(String message, String level, Colors levelColor) {

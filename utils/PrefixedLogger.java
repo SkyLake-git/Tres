@@ -9,11 +9,6 @@ public class PrefixedLogger extends MainLogger {
 		this.prefix = prefix;
 	}
 
-	public PrefixedLogger(String prefix) {
-		super("Main");
-		this.prefix = prefix;
-	}
-
 	@Override
 	public void info(String message) {
 		super.info(this.prefix + message);

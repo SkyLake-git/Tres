@@ -4,8 +4,6 @@ import network.packet.*;
 
 public class TextPacket extends DataPacket implements Serverbound, Clientbound {
 
-	public final ProtocolIds NETWORK_ID = ProtocolIds.TEXT_PACKET;
-
 	public String message = "";
 
 	public String sourceName = "";
@@ -26,5 +24,10 @@ public class TextPacket extends DataPacket implements Serverbound, Clientbound {
 	@Override
 	public String getName() {
 		return "TextPacket";
+	}
+
+	@Override
+	public ProtocolIds getProtocolId() {
+		return ProtocolIds.TEXT_PACKET;
 	}
 }
