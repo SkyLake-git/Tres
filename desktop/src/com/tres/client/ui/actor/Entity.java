@@ -19,7 +19,7 @@ abstract public class Entity extends Actor {
 
 	abstract protected void init();
 
-	public void updateMovement() {
+	public void updateMovement(float delta) {
 
 		if (Math.abs(this.motion.x) < 1e-6) {
 			this.motion.x = 0.0f;
@@ -28,14 +28,14 @@ abstract public class Entity extends Actor {
 		if (Math.abs(this.motion.y) < 1e-6) {
 			this.motion.y = 0.0f;
 		}
-		this.moveBy(this.motion.x, this.motion.y);
+		this.moveBy(this.motion.x * delta, this.motion.y * delta);
 	}
 
 	@Override
 	public void act(float delta) {
 		super.act(delta);
 
-		this.updateMovement();
+		this.updateMovement(delta);
 	}
 
 	public Vector2 getMotion() {

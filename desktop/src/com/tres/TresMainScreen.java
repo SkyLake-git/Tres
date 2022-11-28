@@ -1,5 +1,7 @@
 package com.tres;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -42,6 +44,10 @@ public class TresMainScreen extends ScreenAdapter {
 		this.batch.end();
 
 		this.camera.update();
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+			this.addToastNotification(new ToastNotificationActor.Toast(200, 50, "Hello, World", 1, new Color(1, 1, 1, 0.75f)));
+		}
 	}
 
 	public void addToastNotification(ToastNotificationActor.Toast toast) {
@@ -51,8 +57,6 @@ public class TresMainScreen extends ScreenAdapter {
 	@Override
 	public void resize(int width, int height) {
 		this.stage.getViewport().update(width, height, true);
-
-		this.addToastNotification(new ToastNotificationActor.Toast(200, 50, 1, new Color(1, 1, 1, 0.75f)));
 	}
 
 	protected void refreshBatch() {

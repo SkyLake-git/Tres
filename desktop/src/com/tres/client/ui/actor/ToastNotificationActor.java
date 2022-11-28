@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 public class ToastNotificationActor extends Entity {
 
@@ -15,9 +17,12 @@ public class ToastNotificationActor extends Entity {
 		public double staySeconds;
 		public Color color;
 
-		public Toast(float width, float height, double staySeconds, Color color) {
+		public String text;
+
+		public Toast(float width, float height, String text, double staySeconds, Color color) {
 			this.width = width;
 			this.height = height;
+			this.text = text;
 			this.staySeconds = staySeconds;
 			this.color = color;
 		}
@@ -29,13 +34,22 @@ public class ToastNotificationActor extends Entity {
 
 	protected double startStayMillis;
 
+	protected BitmapFont font;
+
+	protected String text;
+
 	public ToastNotificationActor(Vector2 position, Toast toast) {
 		super(position);
 
 		this.staySeconds = toast.staySeconds;
 
+		this.font = new BitmapFont();
+		this.font.setColor(0.3f, 0.3f, 0.3f, 1);
+
 		setWidth(toast.width);
 		setHeight(toast.height);
+
+		this.text = toast.text;
 
 		recreateTexture((int) toast.width, (int) toast.height, toast.color);
 
@@ -54,14 +68,14 @@ public class ToastNotificationActor extends Entity {
 
 	@Override
 	protected void init() {
-		this.setMotion(new Vector2(0, -2));
+		this.setMotion(new Vector2(0, -200));
 	}
 
 	@Override
 	public void act(float delta) {
 		super.act(delta);
 
-		this.motion.y += 0.02;
+		this.motion.y += 190 * delta;
 
 		if (this.startStayMillis > 0) {
 			double elapsed = System.currentTimeMillis() - this.startStayMillis;
@@ -69,7 +83,7 @@ public class ToastNotificationActor extends Entity {
 				this.motion.y = 0f;
 			}
 
-			if (elapsed > ((this.staySeconds + 0.5) * 1000)) {
+			if (elapsed > ((this.staySeconds + 1.0) * 1000)) {
 				this.remove();
 			}
 		} else {
@@ -88,5 +102,7 @@ public class ToastNotificationActor extends Entity {
 		batch.setColor(col.r, col.g, col.b, col.a * parentAlpha);
 		batch.draw(this.texture, getX(), getY());
 		batch.setColor(beforeColor);
+
+		this.font.draw(batch, this.text, getX() + this.getWidth() / 2, getY() + this.getHeight() / 2 + 5, 0, Align.center, false);
 	}
 }
