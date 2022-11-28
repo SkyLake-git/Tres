@@ -33,7 +33,7 @@ public class TresMainScreen extends ScreenAdapter {
 	public void render(float delta) {
 		this.batch.begin();
 
-		ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1f);
+		ScreenUtils.clear(0.25f, 0.25f, 0.25f, 1f);
 		CharSequence str = "FPS: " + String.format("%.1f", 1 / delta);
 		this.font.draw(this.batch, str, 0, this.stage.getHeight() - 5);
 		this.stage.act(delta);
@@ -44,11 +44,15 @@ public class TresMainScreen extends ScreenAdapter {
 		this.camera.update();
 	}
 
+	public void addToastNotification(ToastNotificationActor.Toast toast) {
+		this.stage.addActor(new ToastNotificationActor(new Vector2(this.stage.getWidth() / 2, this.stage.getHeight() + toast.height - 5), toast));
+	}
+
 	@Override
 	public void resize(int width, int height) {
 		this.stage.getViewport().update(width, height, true);
 
-		this.stage.addActor(new ToastNotificationActor(new Vector2(100, this.stage.getHeight() - 50), 200, 50, new Color(1, 0, 0, 1)));
+		this.addToastNotification(new ToastNotificationActor.Toast(200, 50, 1, new Color(1, 1, 1, 0.75f)));
 	}
 
 	protected void refreshBatch() {
