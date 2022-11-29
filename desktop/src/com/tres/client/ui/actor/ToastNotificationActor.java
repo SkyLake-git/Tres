@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.tres.client.ui.TextureUtils;
 
 public class ToastNotificationActor extends Entity {
 
@@ -46,6 +47,8 @@ public class ToastNotificationActor extends Entity {
 		this.font = new BitmapFont();
 		this.font.setColor(0.3f, 0.3f, 0.3f, 1);
 
+		this.texture = null;
+
 		setWidth(toast.width);
 		setHeight(toast.height);
 
@@ -57,6 +60,7 @@ public class ToastNotificationActor extends Entity {
 	}
 
 	private void recreateTexture(int width, int height, Color color) {
+		if (this.texture != null) this.texture.dispose();
 		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
 		pixmap.setColor(0.1f, 0.1f, 0.1f, 1);
 		pixmap.fillRectangle(0, 0, width, height);
@@ -103,6 +107,8 @@ public class ToastNotificationActor extends Entity {
 		batch.draw(this.texture, getX(), getY());
 		batch.setColor(beforeColor);
 
-		this.font.draw(batch, this.text, getX() + this.getWidth() / 2, getY() + this.getHeight() / 2 + 5, 0, Align.center, false);
+		Vector2 center = TextureUtils.getCenter(this);
+
+		this.font.draw(batch, this.text, center.x, center.y + 5, 0, Align.center, false);
 	}
 }
