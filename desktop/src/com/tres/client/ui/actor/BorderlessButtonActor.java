@@ -61,7 +61,6 @@ public class BorderlessButtonActor extends Actor {
 
 	public void recreateTexture(int width, int height, Color color) {
 		if (this.texture != null) this.texture.dispose();
-		if (this.texture != null) this.texture.dispose();
 		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
 		pixmap.setColor(color);
 		pixmap.fillRectangle(1, 1, width - 2, height - 2);
@@ -71,7 +70,7 @@ public class BorderlessButtonActor extends Actor {
 		}
 
 		if (this.button.confirmSeconds > 0 && this.pressedTime > 0.0001f) {
-			pixmap.setColor(1f, 1f, 1f, 0.35f);
+			pixmap.setColor(1f, 1f, 1f, 0.4f);
 			pixmap.fillRectangle(0, 0, (int) (width * (this.pressedTime / this.button.confirmSeconds)), height);
 		}
 		this.texture = new Texture(pixmap);
@@ -139,5 +138,11 @@ public class BorderlessButtonActor extends Actor {
 
 	public boolean isPressed() {
 		return pressed;
+	}
+
+	@Override
+	public boolean remove() {
+		this.texture.dispose();
+		return super.remove();
 	}
 }

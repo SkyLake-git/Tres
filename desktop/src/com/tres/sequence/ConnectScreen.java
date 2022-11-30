@@ -2,7 +2,9 @@ package com.tres.sequence;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tres.ScreenSequence;
@@ -10,6 +12,7 @@ import com.tres.TresApplication;
 import com.tres.TresMainScreen;
 import com.tres.client.AbsoluteDrawer;
 import com.tres.client.ui.actor.BorderlessButtonActor;
+import com.tres.client.ui.actor.SimpleTextField;
 
 public class ConnectScreen extends ScreenSequence {
 
@@ -50,6 +53,16 @@ public class ConnectScreen extends ScreenSequence {
 				)
 		);
 
+
+		TextField textField = new SimpleTextField(
+				new Vector2(0, 120),
+				300,
+				40,
+				"poop",
+				new BitmapFont(),
+				new Color(1f, 1f, 1f, 1f)
+		);
+		this.stage.addActor(textField);
 		this.stage.addActor(helloButton);
 		this.stage.addActor(testButton);
 
@@ -70,6 +83,7 @@ public class ConnectScreen extends ScreenSequence {
 
 		if (this.button.isPressed()) {
 			this.game.setScreen(new TresMainScreen(this.game, this.getViewport()));
+			this.dispose();
 		}
 	}
 

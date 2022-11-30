@@ -42,6 +42,8 @@ public class TresMainScreen extends ScreenSequence {
 		this.batch = new SpriteBatch();
 
 		this.getViewport().setCamera(this.camera);
+
+		Gdx.input.setOnscreenKeyboardVisible(true);
 	}
 
 	@Override
@@ -64,7 +66,9 @@ public class TresMainScreen extends ScreenSequence {
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.B)) {
 			this.game.setScreen(new ConnectScreen(this.game, this.stage.getViewport()));
+			this.dispose();
 		}
+
 	}
 
 	public void addToastNotification(ToastNotificationActor.Toast toast) {
