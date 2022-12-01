@@ -1,5 +1,7 @@
 package com.tres.sequence;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -12,6 +14,7 @@ import com.tres.TresApplication;
 import com.tres.TresMainScreen;
 import com.tres.client.AbsoluteDrawer;
 import com.tres.client.ui.actor.BorderlessButtonActor;
+import com.tres.client.ui.actor.ChatViewerActor;
 import com.tres.client.ui.actor.SimpleTextField;
 
 public class ConnectScreen extends ScreenSequence {
@@ -21,6 +24,8 @@ public class ConnectScreen extends ScreenSequence {
 	protected AbsoluteDrawer absoluteDrawer;
 
 	protected BorderlessButtonActor button;
+
+	protected ChatViewerActor chat;
 
 	public ConnectScreen(TresApplication game, Viewport viewport) {
 		super(game, viewport);
@@ -62,6 +67,20 @@ public class ConnectScreen extends ScreenSequence {
 				new BitmapFont(),
 				new Color(1f, 1f, 1f, 1f)
 		);
+
+		ChatViewerActor chat = new ChatViewerActor(
+				new Vector2(15, 6),
+				new ChatViewerActor.ChatView(
+						1,
+						new Color(0, 0, 0, 1f),
+						30,
+						10,
+						new Color(0.1f, 0.1f, 0.1f, 0.7f)
+				)
+		);
+
+		this.chat = chat;
+
 		this.stage.addActor(textField);
 		this.stage.addActor(helloButton);
 		this.stage.addActor(testButton);
@@ -69,6 +88,8 @@ public class ConnectScreen extends ScreenSequence {
 		this.button = testButton;
 
 		this.getViewport().setCamera(this.camera);
+
+		this.absoluteDrawer.addActor(chat);
 	}
 
 	@Override
@@ -84,6 +105,11 @@ public class ConnectScreen extends ScreenSequence {
 		if (this.button.isPressed()) {
 			this.game.setScreen(new TresMainScreen(this.game, this.getViewport()));
 			this.dispose();
+		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+
+			chat.addLog(new ChatViewerActor.ChatLog("Hello world", 5));
 		}
 	}
 
