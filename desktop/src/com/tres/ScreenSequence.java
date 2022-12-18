@@ -15,9 +15,12 @@ abstract public class ScreenSequence extends ScreenAdapter {
 		this.stage = new Stage(viewport);
 		this.game = game;
 
-		Gdx.input.setInputProcessor(this.stage);
 
 		this.init();
+	}
+
+	public void focus() {
+		Gdx.input.setInputProcessor(this.stage);
 	}
 
 	abstract protected void init();
