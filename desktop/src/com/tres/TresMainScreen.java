@@ -42,8 +42,6 @@ public class TresMainScreen extends ScreenSequence {
 		this.batch = new SpriteBatch();
 
 		this.getViewport().setCamera(this.camera);
-
-		Gdx.input.setOnscreenKeyboardVisible(true);
 	}
 
 	@Override
