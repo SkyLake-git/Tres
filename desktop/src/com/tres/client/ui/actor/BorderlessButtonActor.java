@@ -70,8 +70,13 @@ public class BorderlessButtonActor extends Actor {
 		}
 
 		if (this.button.confirmSeconds > 0 && this.pressedTime > 0.0001f) {
-			pixmap.setColor(1f, 1f, 1f, 0.4f);
-			pixmap.fillRectangle(0, 0, (int) (width * (this.pressedTime / this.button.confirmSeconds)), height);
+			float percentage = (float) Math.min(1.0, this.pressedTime / this.button.confirmSeconds);
+			if (percentage >= 1.0) {
+				pixmap.setColor(1f, 1f, 0f, 0.4f);
+			} else {
+				pixmap.setColor(1f, 1f, 1f, 0.4f);
+			}
+			pixmap.fillRectangle(0, 0, (int) (width * percentage), height);
 		}
 		this.texture = new Texture(pixmap);
 		pixmap.dispose();
@@ -106,6 +111,8 @@ public class BorderlessButtonActor extends Actor {
 
 		Vector2 pos = this.screenToLocalCoordinates(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 		boolean hit = this.hit(pos.x, pos.y, true) != null;
+
+		this.pressed = false;
 		if (this.button.confirmSeconds > 0) {
 			if (this.hit && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
 				this.pressedTime += delta;
