@@ -44,6 +44,8 @@ public class BorderlessButtonActor extends Actor {
 
 	protected float pressedTime;
 
+	protected boolean disabled;
+
 	public BorderlessButtonActor(Vector2 position, Button button) {
 		setX(position.x - button.width / 2);
 		setY(position.y - button.height / 2);
@@ -59,21 +61,26 @@ public class BorderlessButtonActor extends Actor {
 		recreateTexture((int) button.width, (int) button.height, button.backgroundColor);
 	}
 
-	public void recreateTexture(int width, int height, Color color) {
+	public void recreateTexture(int width, int height, Color colorDefault) {
 		if (this.texture != null) this.texture.dispose();
+		Color color = colorDefault.cpy();
 		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+		if (this.disabled) {
+			color.add(0.15f, 0.15f, 0.15f, 0);
+		}
 		pixmap.setColor(color);
 		pixmap.fillRectangle(1, 1, width - 2, height - 2);
-		if (this.hit) {
+		if (this.hit && !this.disabled) {
 			pixmap.setColor(0.0f, 0.5f, 0.5f, 1);
 			pixmap.drawRectangle(0, 0, width, height);
 		}
 
+
 		if (this.button.confirmSeconds > 0 && this.pressedTime > 0.0001f) {
 			float percentage = (float) Math.min(1.0, this.pressedTime / this.button.confirmSeconds);
 			if (percentage >= 1.0) {
-				pixmap.setColor(1f, 1f, 0f, 0.4f);
 			} else {
+				pixmap.setColor(1f, 1f, 0f, 0.4f);
 				pixmap.setColor(1f, 1f, 1f, 0.4f);
 			}
 			pixmap.fillRectangle(0, 0, (int) (width * percentage), height);
@@ -96,6 +103,14 @@ public class BorderlessButtonActor extends Actor {
 		this.recreateTexture((int) getWidth(), (int) getHeight(), this.button.backgroundColor);
 	}
 
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}
+
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
 		this.recreateTexture((int) getWidth(), (int) getHeight(), this.button.backgroundColor);
@@ -114,7 +129,7 @@ public class BorderlessButtonActor extends Actor {
 
 		this.pressed = false;
 		if (this.button.confirmSeconds > 0) {
-			if (this.hit && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+			if (this.hit && !this.disabled && Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
 				this.pressedTime += delta;
 
 				if (this.pressedTime > this.button.confirmSeconds) {
@@ -124,7 +139,7 @@ public class BorderlessButtonActor extends Actor {
 				this.pressedTime = 0.0f;
 			}
 		} else {
-			this.pressed = this.hit && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+			this.pressed = this.hit && Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !this.disabled;
 		}
 
 

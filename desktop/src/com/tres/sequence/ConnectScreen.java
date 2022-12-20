@@ -1,21 +1,23 @@
 package com.tres.sequence;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.tres.DesktopLauncher;
 import com.tres.ScreenSequence;
 import com.tres.TresApplication;
-import com.tres.TresMainScreen;
 import com.tres.client.AbsoluteDrawer;
 import com.tres.client.ui.actor.BorderlessButtonActor;
-import com.tres.client.ui.actor.ChatViewerActor;
 import com.tres.client.ui.actor.SimpleTextField;
+import com.tres.client.ui.layout.Layout;
+import com.tres.client.ui.layout.NarrowLayout;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class ConnectScreen extends ScreenSequence {
 
@@ -23,9 +25,13 @@ public class ConnectScreen extends ScreenSequence {
 
 	protected AbsoluteDrawer absoluteDrawer;
 
-	protected BorderlessButtonActor button;
+	protected BorderlessButtonActor connectButton;
 
-	protected ChatViewerActor chat;
+
+	protected Layout ipLayout;
+	protected SimpleTextField addressField;
+
+	protected SimpleTextField portField;
 
 	public ConnectScreen(TresApplication game, Viewport viewport) {
 		super(game, viewport);
@@ -36,60 +42,46 @@ public class ConnectScreen extends ScreenSequence {
 		this.absoluteDrawer = new AbsoluteDrawer();
 		this.camera = new OrthographicCamera(getViewport().getScreenWidth(), getViewport().getScreenHeight());
 		//this.stage.setDebugUnderMouse(true);
-		BorderlessButtonActor helloButton = new BorderlessButtonActor(
+		this.connectButton = new BorderlessButtonActor(
+				new Vector2(0, -120),
+				new BorderlessButtonActor.Button(
+						"Connect",
+						300,
+						40,
+						new Color(0, 0.0f, 0, 1),
+						1
+				)
+		);
+
+		this.ipLayout = new NarrowLayout(new Vector2(-90, 0), 200, 30, Align.left, 15);
+
+		this.addressField = new SimpleTextField(
 				new Vector2(0, 0),
-				new BorderlessButtonActor.Button(
-						"Hello",
-						300,
-						40,
-						new Color(0, 0.0f, 0, 1),
-						2
-				)
-		);
-
-		BorderlessButtonActor testButton = new BorderlessButtonActor(
-				new Vector2(0, 60),
-				new BorderlessButtonActor.Button(
-						"World",
-						300,
-						40,
-						new Color(0, 0.0f, 0, 1),
-						0
-				)
-		);
-
-
-		TextField textField = new SimpleTextField(
-				new Vector2(0, 120),
-				300,
-				40,
-				"poop",
+				120,
+				30,
+				"",
 				new BitmapFont(),
 				new Color(1f, 1f, 1f, 1f)
 		);
 
-		ChatViewerActor chat = new ChatViewerActor(
-				new Vector2(15, 6),
-				new ChatViewerActor.ChatView(
-						1,
-						new Color(0, 0, 0, 1f),
-						30,
-						10,
-						new Color(0.1f, 0.1f, 0.1f, 0.7f)
-				)
+		this.portField = new SimpleTextField(
+				new Vector2(0, 0),
+				46,
+				30,
+				"",
+				new BitmapFont(),
+				new Color(1f, 1f, 1f, 1f)
 		);
 
-		this.chat = chat;
+		this.ipLayout.add(this.addressField);
+		this.ipLayout.add(this.portField);
 
-		this.stage.addActor(textField);
-		this.stage.addActor(helloButton);
-		this.stage.addActor(testButton);
-
-		this.button = testButton;
+		this.stage.addActor(this.connectButton);
+		this.stage.addActor(this.addressField);
+		this.stage.addActor(this.portField);
 
 		this.getViewport().setCamera(this.camera);
 
-		this.absoluteDrawer.addActor(chat);
 	}
 
 	@Override
@@ -102,14 +94,16 @@ public class ConnectScreen extends ScreenSequence {
 		this.absoluteDrawer.act(delta);
 		this.absoluteDrawer.draw();
 
-		if (this.button.isPressed()) {
-			this.game.setScreen(new TresMainScreen(this.game, this.getViewport()));
-			this.dispose();
-		}
+		if (this.connectButton.isPressed()) {
+			this.connectButton.setDisabled(true);
+			this.addressField.setDisabled(true);
+			this.portField.setDisabled(true);
 
-		if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-
-			chat.addLog(new ChatViewerActor.ChatLog("Hello world", 5));
+			try {
+				DesktopLauncher.client.start(new InetSocketAddress(this.addressField.getText(), Integer.parseInt(this.portField.getText())));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

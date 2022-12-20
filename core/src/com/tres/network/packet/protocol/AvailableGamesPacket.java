@@ -1,12 +1,11 @@
 package com.tres.network.packet.protocol;
 
+import com.tres.network.packet.Clientbound;
 import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.PacketDecoder;
 import com.tres.network.packet.PacketEncoder;
-import com.tres.network.packet.Serverbound;
 
-public class RequestGameLevelPacket extends DataPacket implements Serverbound {
-
+public class AvailableGamesPacket extends DataPacket implements Clientbound {
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
 
@@ -19,11 +18,11 @@ public class RequestGameLevelPacket extends DataPacket implements Serverbound {
 
 	@Override
 	public String getName() {
-		return "RequestGameLevelPacket";
+		return null;
 	}
 
 	@Override
 	public ProtocolIds getProtocolId() {
-		return ProtocolIds.REQUEST_GAME_LEVEL_PACKET;
+		return ProtocolIds.AVAILABLE_GAMES_PACKET;
 	}
 }

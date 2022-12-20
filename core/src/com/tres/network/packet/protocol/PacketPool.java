@@ -27,7 +27,7 @@ public class PacketPool {
 		this.register(new GameLevelPacket());
 		this.register(new AddPlayerPacket());
 		this.register(new CardActionPacket());
-		this.register(new RequestGameLevelPacket());
+		this.register(new RequestAvailableGamesPacket());
 	}
 
 	public void register(DataPacket packet) {
