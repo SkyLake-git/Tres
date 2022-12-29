@@ -6,14 +6,16 @@ import com.tres.network.packet.PacketDecoder;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 public class PacketPool {
 
-	protected HashMap<Integer, DataPacket> pool;
+	protected HashMap<Integer, Constructor<? extends DataPacket>> pool;
 
 	public PacketPool() {
-		this.pool = new HashMap<Integer, DataPacket>();
+		this.pool = new HashMap<>();
 
 		this.register(new TextPacket());
 		this.register(new DisconnectPacket());
@@ -28,20 +30,28 @@ public class PacketPool {
 		this.register(new AddPlayerPacket());
 		this.register(new CardActionPacket());
 		this.register(new RequestAvailableGamesPacket());
+		this.register(new AvailableGamesPacket());
+		this.register(new PlayerActionPacket());
+		this.register(new PlayerActionResponsePacket());
 	}
 
 	public void register(DataPacket packet) {
 		try {
 			// System.out.println("Packet Registered: ID: " + packet.clone().getProtocolId().id + " Packet: " + packet.getName());
-			this.pool.put(packet.getProtocolId().id, packet.clone());
-		} catch (CloneNotSupportedException e) {
+			this.pool.put(packet.getProtocolId().id, packet.getClass().getConstructor());
+		} catch (NoSuchMethodException e) {
 
 		}
 	}
 
 	public DataPacket getPacketById(int id) {
 		if (this.pool.containsKey(id)) {
-			return this.pool.get(id);
+			try {
+				return this.pool.get(id).newInstance();
+			} catch (InvocationTargetException | InstantiationException |
+					 IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		return null;

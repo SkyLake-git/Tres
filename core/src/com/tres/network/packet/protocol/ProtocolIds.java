@@ -15,12 +15,14 @@ public enum ProtocolIds {
 	ADD_PLAYER_PACKET(11),
 	CARD_ACTION_PACKET(12),
 	REQUEST_AVAILABLE_GAMES_PACKET(13),
-	AVAILABLE_GAMES_PACKET(14);
+	AVAILABLE_GAMES_PACKET(14),
+	PLAYER_ACTION_PACKET(15),
+	PLAYER_ACTION_RESPONSE_PACKET(16);
 
-	public static final int PROTOCOL = 3;
+	public static final int PROTOCOL = 4;
 	public static final int VERSION = 1;
 
-	public int id;
+	public final int id;
 
 	ProtocolIds(int id) {
 		this.id = id;
