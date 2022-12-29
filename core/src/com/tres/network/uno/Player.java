@@ -2,17 +2,17 @@ package com.tres.network.uno;
 
 abstract public class Player {
 
-	private static int CURRENT_ID = 0;
+	private static short CURRENT_ID = 0;
 
-	public static int nextRuntimeId() {
+	public static short nextRuntimeId() {
 		return CURRENT_ID++;
 	}
 
-	protected int runtimeId;
+	protected short runtimeId;
 
 	protected CardInfo cards;
 
-	public Player(int runtimeId) {
+	public Player(short runtimeId) {
 		this.runtimeId = runtimeId;
 		this.cards = new CardInfo(this);
 	}
@@ -21,7 +21,7 @@ abstract public class Player {
 		return cards;
 	}
 
-	public int getId() {
+	public short getId() {
 		return this.runtimeId;
 	}
 }

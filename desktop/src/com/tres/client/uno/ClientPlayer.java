@@ -1,5 +1,6 @@
 package com.tres.client.uno;
 
+import com.tres.network.packet.PlayerInfo;
 import com.tres.network.uno.CardList;
 import com.tres.network.uno.NetworkCard;
 import com.tres.network.uno.Player;
@@ -10,13 +11,16 @@ public class ClientPlayer extends Player {
 
 	protected CardList cards;
 
-	protected String name;
+	protected PlayerInfo info;
 
-	public ClientPlayer(int runtimeId, String name) {
+	protected String displayName;
+
+	public ClientPlayer(short runtimeId, PlayerInfo info) {
 		super(runtimeId);
 		this.cardAssistant = new CardAssistant(this);
 		this.cards = new CardList(this);
-		this.name = name;
+		this.info = info;
+		this.displayName = info.getUsername();
 	}
 
 	public CardAssistant getCardAssistant() {
@@ -24,7 +28,11 @@ public class ClientPlayer extends Player {
 	}
 
 	public String getName() {
-		return name;
+		return this.info.getUsername();
+	}
+
+	public String getDisplayName() {
+		return this.displayName;
 	}
 
 	public void refreshCardAssistant() {
