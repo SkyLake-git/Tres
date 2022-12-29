@@ -1,11 +1,13 @@
 package com.tres.client;
 
 
+import com.tres.event.EventEmitter;
 import com.tres.network.packet.Clientbound;
 import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
 import com.tres.network.packet.protocol.PacketPool;
+import com.tres.snooze.Sleeper;
 import com.tres.utils.Colors;
 import com.tres.utils.Heartbeat;
 import com.tres.utils.MainLogger;
@@ -21,6 +23,7 @@ public class Client implements Heartbeat.Syncable {
 
 	protected Heartbeat heartbeat;
 
+	protected EventEmitter eventEmitter;
 
 	protected MainLogger logger;
 
@@ -35,29 +38,34 @@ public class Client implements Heartbeat.Syncable {
 
 	protected ClientSession session;
 
+	protected Sleeper tickSleeper;
+
 	public Client() {
-		try {
-			this.socket = null;
+		this.socket = null;
 
-			this.heartbeat = new Heartbeat(20);
-			this.heartbeat.getList().add(this);
+		this.heartbeat = new Heartbeat(20);
+		this.heartbeat.getList().add(this);
 
-			this.logger = new MainLogger("Client");
+		this.logger = new MainLogger("Client");
 
-			this.packetPool = new PacketPool();
+		this.packetPool = new PacketPool();
 
-			this.listener = null;
+		this.listener = null;
 
-			this.tick = 0;
+		this.tick = 0;
 
-			this.isClosed = false;
-			this.isRunning = false;
+		this.isClosed = false;
+		this.isRunning = false;
 
-			this.session = null;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		this.session = null;
 
+		this.eventEmitter = new EventEmitter();
+
+		this.tickSleeper = new Sleeper();
+	}
+
+	public Sleeper getTickSleeper() {
+		return tickSleeper;
 	}
 
 	public void start(InetSocketAddress address) throws IOException {
@@ -78,6 +86,8 @@ public class Client implements Heartbeat.Syncable {
 
 			this.heartbeat.start();
 			this.listener.start();
+
+
 		}
 	}
 
@@ -107,6 +117,10 @@ public class Client implements Heartbeat.Syncable {
 
 	public boolean isClosed() {
 		return isClosed;
+	}
+
+	public EventEmitter getEventEmitter() {
+		return eventEmitter;
 	}
 
 	private void closeCleanup() {
@@ -167,6 +181,8 @@ public class Client implements Heartbeat.Syncable {
 
 	public void tick() {
 		this.tick++;
+
+		this.tickSleeper.processNotifications();
 
 		this.session.tick();
 	}
