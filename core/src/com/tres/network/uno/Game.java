@@ -4,7 +4,7 @@ abstract public class Game {
 
 	protected int playerCount;
 
-	protected int turnPlayer;
+	protected short turnPlayer;
 
 	protected int deckCount;
 
@@ -21,7 +21,7 @@ abstract public class Game {
 		return playerCount;
 	}
 
-	public int getTurnPlayer() {
+	public short getTurnPlayer() {
 		return turnPlayer;
 	}
 
