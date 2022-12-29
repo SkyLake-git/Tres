@@ -47,4 +47,8 @@ public class PacketEncoder {
 	public void writeBoolean(boolean v) throws IOException {
 		this.stream.writeBoolean(v);
 	}
+
+	public void writeLong(long v) throws IOException {
+		this.stream.writeLong(v);
+	}
 }
