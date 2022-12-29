@@ -1,6 +1,5 @@
 package com.tres.client.network.handler;
 
-import com.tres.network.packet.Clientbound;
 import com.tres.network.packet.protocol.*;
 
 public interface PacketHandler {
@@ -16,6 +15,4 @@ public interface PacketHandler {
 	void handlePlayerInitialized(PlayerInitializedPacket packet);
 
 	void handleGameEvent(GameEventPacket packet);
-
-	void handle(Clientbound packet);
 }

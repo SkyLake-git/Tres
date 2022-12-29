@@ -2,6 +2,9 @@ package com.tres.client.network.handler;
 
 import com.tres.client.Client;
 import com.tres.client.ClientSession;
+import com.tres.client.event.LoginCompleteEvent;
+import com.tres.network.packet.ClientInfo;
+import com.tres.network.packet.PlayerInfo;
 import com.tres.network.packet.protocol.*;
 
 public class InGamePacketHandler extends BasePacketHandler {
@@ -45,6 +48,7 @@ public class InGamePacketHandler extends BasePacketHandler {
 
 			ClientInfoPacket response = new ClientInfoPacket();
 			response.remoteAddress = this.session.getClient().getSocket().getLocalAddress().toString();
+			response.info = new ClientInfo("RequestedName");
 
 			this.session.sendDataPacket(response);
 		}
@@ -54,7 +58,9 @@ public class InGamePacketHandler extends BasePacketHandler {
 	public void handlePlayerInitialized(PlayerInitializedPacket packet) {
 		this.session.getLogger().info("Player initialized as server! name: " + packet.name + " runtimeId: " + packet.runtimeId);
 
-		this.session.createPlayer(packet.name);
+		this.session.createPlayer(new PlayerInfo(packet.name));
+
+		this.client.getEventEmitter().emit(new LoginCompleteEvent());
 	}
 
 	@Override
