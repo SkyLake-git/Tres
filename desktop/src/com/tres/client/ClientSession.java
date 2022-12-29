@@ -1,16 +1,16 @@
 package com.tres.client;
 
 
+import com.tres.client.event.packet.DataPacketReceiveEvent;
+import com.tres.client.event.packet.DataPacketSendEvent;
 import com.tres.client.network.handler.InGamePacketHandler;
 import com.tres.client.network.handler.PacketHandler;
 import com.tres.client.uno.ClientPlayer;
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.NetworkSettings;
-import com.tres.network.packet.PacketSender;
+import com.tres.network.packet.*;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.uno.Player;
 import com.tres.utils.Colors;
+import com.tres.utils.ParameterMethodCaller;
 import com.tres.utils.PrefixedLogger;
 
 import java.io.IOException;
@@ -29,18 +29,30 @@ public class ClientSession {
 
 	protected ClientPlayer player;
 
+	protected ParameterMethodCaller<Packet> packetHandlerCaller;
+
+	protected ClientNetworkActions actions;
+
 	ClientSession(Client client) {
 		this.client = client;
 		this.tick = 0;
+		this.packetHandlerCaller = null;
 		this.packetSender = new PacketSender(this.client.getSocket(), new NetworkSettings(true));
-		this.packetHandler = new InGamePacketHandler(this.client, this);
+		this.setPacketHandler(new InGamePacketHandler(this.client, this));
 		this.logger = new PrefixedLogger("[ClientSession] ", "Client");
-
 		this.player = null;
+
+		this.actions = new ClientNetworkActions(this);
+	}
+
+	public ClientNetworkActions getActions() {
+		return actions;
 	}
 
 	void tick() {
 		this.tick++;
+
+		this.actions.tick();
 
 		if (!this.isConnected()) {
 			throw new RuntimeException("socket not connected");
@@ -54,13 +66,10 @@ public class ClientSession {
 		}
 	}
 
-	public void createPlayer(String name) {
+	public void createPlayer(PlayerInfo info) {
 		if (this.player == null) {
-			this.player = new ClientPlayer(Player.nextRuntimeId(), name);
+			this.player = new ClientPlayer(Player.nextRuntimeId(), info);
 		}
-	}
-
-	public void fetchGameList() {
 	}
 
 	public boolean isConnected() {
@@ -87,9 +96,20 @@ public class ClientSession {
 		return packetSender;
 	}
 
+	public void setPacketHandler(PacketHandler packetHandler) {
+		this.packetHandler = packetHandler;
+
+		this.packetHandlerCaller = new ParameterMethodCaller<>(this.packetHandler);
+	}
+
+	public ParameterMethodCaller<Packet> getPacketHandlerCaller() {
+		return packetHandlerCaller;
+	}
 
 	public void sendDataPacket(DataPacket packet, boolean flush) {
 		this.packetSender.sendPacket(packet);
+
+		this.client.getEventEmitter().emit(new DataPacketSendEvent(packet));
 
 		if (flush) {
 			try {
@@ -111,6 +131,9 @@ public class ClientSession {
 		this.packetSender = null;
 		this.logger.info("Closed packet Handler/Sender");
 
+		this.actions.close();
+		this.logger.info("Closed network actions");
+
 		try {
 			this.client.getSocket().close();
 			this.logger.info("Closed socket");
@@ -129,7 +152,17 @@ public class ClientSession {
 		this.logger.info("Received: " + packet.getName());
 
 		if (packet instanceof Clientbound) {
-			this.packetHandler.handle((Clientbound) packet);
+			try {
+				this.packetHandlerCaller.call(packet);
+			} catch (RuntimeException e) {
+				this.logger.emergency("Error occurred when trying to invoke a method");
+				this.logger.info(e.toString());
+			} catch (Throwable e) {
+				this.logger.warn("Error occurred whilst invoking method");
+				this.logger.info(e.toString());
+			}
+
+			this.client.getEventEmitter().emit(new DataPacketReceiveEvent(packet));
 		}
 	}
 }
