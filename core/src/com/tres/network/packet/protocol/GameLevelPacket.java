@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class GameLevelPacket extends DataPacket implements Clientbound {
 
 
-	public String gameId;
+	public int gameId;
 	public ArrayList<Short> players;
 	public short turnPlayer;
 	public int turnCount;
@@ -18,7 +18,7 @@ public class GameLevelPacket extends DataPacket implements Clientbound {
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.gameId = in.readString();
+		this.gameId = in.readInt();
 		this.players = new ArrayList<>();
 		int length = in.readInt();
 		for (int i = 0; i < length; i++) {
@@ -32,7 +32,7 @@ public class GameLevelPacket extends DataPacket implements Clientbound {
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.gameId);
+		out.writeInt(this.gameId);
 		out.getStream().writeInt(this.players.size());
 		for (short runtimeId : this.players) {
 			out.getStream().writeShort(runtimeId);
