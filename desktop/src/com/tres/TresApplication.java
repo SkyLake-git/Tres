@@ -8,9 +8,12 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.tres.client.ui.WorldUtils;
 import com.tres.sequence.SettingsScreen;
+import com.tres.snooze.Sleeper;
 
 public class TresApplication extends Game {
 
@@ -20,7 +23,11 @@ public class TresApplication extends Game {
 	protected BitmapFont font;
 	protected ShapeRenderer shapeRenderer;
 
+	protected Viewport debugViewport;
+
 	protected TresApplicationSettings settings;
+
+	protected Sleeper renderSleeper;
 
 	public TresApplication(Lwjgl3ApplicationConfiguration config) {
 		this.settings = new TresApplicationSettings();
@@ -32,12 +39,18 @@ public class TresApplication extends Game {
 
 	@Override
 	public void create() {
-		this.viewport = new ScreenViewport();
+		this.viewport = new FitViewport(WorldUtils.WIDTH, WorldUtils.HEIGHT);
+		this.debugViewport = new ScreenViewport();
 		this.setScreen(new TresMainScreen(this, viewport));
 
 		this.batch = new SpriteBatch();
 		this.font = new BitmapFont();
 		this.shapeRenderer = new ShapeRenderer();
+		this.renderSleeper = new Sleeper();
+	}
+
+	public Sleeper getRenderSleeper() {
+		return renderSleeper;
 	}
 
 	@Override
@@ -51,8 +64,12 @@ public class TresApplication extends Game {
 
 	@Override
 	public void render() {
+		this.viewport.apply();
 		super.render();
 
+		this.renderSleeper.processNotifications();
+
+		this.debugViewport.apply();
 		this.batch.begin();
 		this.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 		this.batch.setColor(0, 1f, 0.2f, 0.5f);
@@ -60,8 +77,8 @@ public class TresApplication extends Game {
 		float delta = Gdx.graphics.getDeltaTime();
 
 		CharSequence str = "FPS: " + Gdx.graphics.getFramesPerSecond();
-		this.font.draw(this.batch, str, 0, this.viewport.getScreenHeight() - 5);
-		this.font.draw(this.batch, "F: " + String.format("%.0f", 1 / delta), 100, this.viewport.getScreenHeight() - 5);
+		this.font.draw(this.batch, str, 0, this.debugViewport.getScreenHeight() - 5);
+		this.font.draw(this.batch, "F: " + String.format("%.0f", 1 / delta), 100, this.debugViewport.getScreenHeight() - 5);
 
 		this.batch.end();
 		this.shapeRenderer.end();
@@ -71,18 +88,59 @@ public class TresApplication extends Game {
 				this.setScreen(new SettingsScreen(this, this.viewport, this.getScreen()));
 			}
 		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F11) && Gdx.graphics.isFullscreen()) {
+			Gdx.graphics.setWindowedMode(1600, 900);
+		} else if (Gdx.input.isKeyJustPressed(Input.Keys.F11) && !Gdx.graphics.isFullscreen()) {
+			Gdx.graphics.setWindowedMode(this.settings.getMonitorWidth(), this.settings.getMonitorHeight());
+
+		}
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F9)) {
+			Gdx.graphics.setWindowedMode(300, 168);
+		}
 	}
 
 	@Override
 	public void resize(int width, int height) {
+		boolean applied = false;
+
+		if (width != this.viewport.getScreenWidth() && width >= 10) {
+			height = (int) WorldUtils.getHeightFromWidth(width);
+
+			applied = true;
+		}
+
+		if (height != this.viewport.getScreenHeight() && height >= 10 && !applied) {
+			width = (int) WorldUtils.getWidthFromHeight(height);
+
+			applied = true;
+		}
+
+		if (width >= this.settings.getMonitorWidth()) {
+			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+		} else {
+			if (applied) {
+				Gdx.graphics.setWindowedMode(width, height);
+			}
+
+		}
+
+		width = Gdx.graphics.getWidth();
+		height = Gdx.graphics.getHeight();
 		super.resize(width, height);
 
 		this.viewport.update(width, height, false);
+		this.debugViewport.update(width, height, false);
+
+
 		this.batch.dispose();
 		this.batch = new SpriteBatch();
 
 		this.shapeRenderer.dispose();
 		this.shapeRenderer = new ShapeRenderer();
+
+
 	}
 
 	@Override
