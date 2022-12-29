@@ -12,7 +12,9 @@ import com.tres.ScreenSequence;
 import com.tres.TresApplication;
 import com.tres.client.AbsoluteDrawer;
 import com.tres.client.ui.actor.BorderlessButtonActor;
+import com.tres.client.ui.actor.ChatViewerActor;
 import com.tres.client.ui.actor.SimpleTextField;
+import com.tres.client.ui.actor.TextActor;
 import com.tres.client.ui.layout.Layout;
 import com.tres.client.ui.layout.NarrowLayout;
 
@@ -33,6 +35,8 @@ public class ConnectScreen extends ScreenSequence {
 
 	protected SimpleTextField portField;
 
+	protected ChatViewerActor chatViewerActor;
+
 	public ConnectScreen(TresApplication game, Viewport viewport) {
 		super(game, viewport);
 	}
@@ -46,19 +50,30 @@ public class ConnectScreen extends ScreenSequence {
 				new Vector2(0, -120),
 				new BorderlessButtonActor.Button(
 						"Connect",
-						300,
-						40,
+						400,
+						60,
 						new Color(0, 0.0f, 0, 1),
 						1
 				)
 		);
 
-		this.ipLayout = new NarrowLayout(new Vector2(-90, 0), 200, 30, Align.left, 15);
+		this.ipLayout = new NarrowLayout(new Vector2(-90, 0), 200, 30, Align.left, 15, false);
+
+		this.chatViewerActor = new ChatViewerActor(
+				new Vector2(0, 0),
+				new ChatViewerActor.ChatView(
+						1f,
+						new Color(1f, 1f, 1f, 1f),
+						30,
+						20,
+						new Color(0f, 0.1f, 0f, 1f)
+				)
+		);
 
 		this.addressField = new SimpleTextField(
 				new Vector2(0, 0),
-				120,
-				30,
+				180,
+				45,
 				"",
 				new BitmapFont(),
 				new Color(1f, 1f, 1f, 1f)
@@ -66,8 +81,8 @@ public class ConnectScreen extends ScreenSequence {
 
 		this.portField = new SimpleTextField(
 				new Vector2(0, 0),
-				46,
-				30,
+				69,
+				45,
 				"",
 				new BitmapFont(),
 				new Color(1f, 1f, 1f, 1f)
@@ -79,6 +94,8 @@ public class ConnectScreen extends ScreenSequence {
 		this.stage.addActor(this.connectButton);
 		this.stage.addActor(this.addressField);
 		this.stage.addActor(this.portField);
+
+		this.absoluteDrawer.addActor(this.chatViewerActor);
 
 		this.getViewport().setCamera(this.camera);
 
@@ -95,14 +112,26 @@ public class ConnectScreen extends ScreenSequence {
 		this.absoluteDrawer.draw();
 
 		if (this.connectButton.isPressed()) {
+
 			this.connectButton.setDisabled(true);
 			this.addressField.setDisabled(true);
 			this.portField.setDisabled(true);
 
 			try {
 				DesktopLauncher.client.start(new InetSocketAddress(this.addressField.getText(), Integer.parseInt(this.portField.getText())));
+
+				this.game.setScreen(new GameSelectScreen(this.game, getViewport()));
+
+
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+
+				TextActor actor = TextActor.annotation(this.connectButton, "Failed to connect", new BitmapFont());
+				actor.setDuration(3);
+				this.stage.addActor(actor);
+
+				this.connectButton.setDisabled(false);
+				this.addressField.setDisabled(false);
+				this.portField.setDisabled(false);
 			}
 		}
 	}
