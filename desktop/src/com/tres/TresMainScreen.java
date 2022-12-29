@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.tres.client.AbsoluteDrawer;
 import com.tres.client.ui.actor.ToastNotificationActor;
@@ -36,7 +35,7 @@ public class TresMainScreen extends ScreenSequence {
 		this.camera = new OrthographicCamera();
 		this.camera.setToOrtho(false, getViewport().getScreenWidth(), getViewport().getScreenHeight());
 
-		this.stage = new Stage(new ScreenViewport(camera));
+		this.stage = new Stage(this.getViewport());
 		this.font = new BitmapFont();
 		this.font.setColor(0, 0.9f, 0, 0.8f);
 		this.batch = new SpriteBatch();
