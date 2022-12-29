@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 import com.tres.client.ui.TextureUtils;
+import com.tres.client.ui.WorldUtils;
 
 public class BorderlessButtonActor extends Actor {
 
@@ -62,17 +63,26 @@ public class BorderlessButtonActor extends Actor {
 	}
 
 	public void recreateTexture(int width, int height, Color colorDefault) {
+		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+		this.recreateTexture(colorDefault, pixmap);
+
+		pixmap.dispose();
+	}
+
+	public void recreateTexture(Color colorDefault, Pixmap basePixmap) {
 		if (this.texture != null) this.texture.dispose();
 		Color color = colorDefault.cpy();
-		Pixmap pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+
+		int width = basePixmap.getWidth();
+		int height = basePixmap.getHeight();
 		if (this.disabled) {
 			color.add(0.15f, 0.15f, 0.15f, 0);
 		}
-		pixmap.setColor(color);
-		pixmap.fillRectangle(1, 1, width - 2, height - 2);
+		basePixmap.setColor(color);
+		basePixmap.fillRectangle(1, 1, width - 2, height - 2);
 		if (this.hit && !this.disabled) {
-			pixmap.setColor(0.0f, 0.5f, 0.5f, 1);
-			pixmap.drawRectangle(0, 0, width, height);
+			basePixmap.setColor(0.0f, 0.5f, 0.5f, 1);
+			basePixmap.drawRectangle(0, 0, width, height);
 		}
 
 
@@ -80,13 +90,12 @@ public class BorderlessButtonActor extends Actor {
 			float percentage = (float) Math.min(1.0, this.pressedTime / this.button.confirmSeconds);
 			if (percentage >= 1.0) {
 			} else {
-				pixmap.setColor(1f, 1f, 0f, 0.4f);
-				pixmap.setColor(1f, 1f, 1f, 0.4f);
+				basePixmap.setColor(1f, 1f, 0f, 0.4f);
+				basePixmap.setColor(1f, 1f, 1f, 0.4f);
 			}
-			pixmap.fillRectangle(0, 0, (int) (width * percentage), height);
+			basePixmap.fillRectangle(0, 0, (int) (width * percentage), height);
 		}
-		this.texture = new Texture(pixmap);
-		pixmap.dispose();
+		this.texture = new Texture(basePixmap);
 	}
 
 	@Override
@@ -117,7 +126,9 @@ public class BorderlessButtonActor extends Actor {
 		batch.draw(this.texture, getX(), getY());
 		Vector2 center = TextureUtils.getCenter(this);
 
-		this.font.draw(batch, this.button.text, center.x, center.y + 5, 0, Align.center, false);
+		WorldUtils.drawAsScreenViewport(batch, this.getStage().getViewport(), () -> {
+			this.font.draw(batch, this.button.text, center.x, center.y + 5, 0, Align.center, false);
+		});
 	}
 
 	@Override
