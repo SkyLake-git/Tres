@@ -73,7 +73,7 @@ public class Heartbeat extends Thread {
 
 				long wait = Math.max(0, delayMillis);
 
-				this.realTps = 1000 / (Math.max(delayMillis, loadMillis));
+				this.realTps = 1000f / (Math.max(delayMillis, loadMillis));
 				this.nextRun = start + delayMillis;
 			}
 		}
