@@ -1,0 +1,22 @@
+apply plugin: "java-library"
+
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+sourceSets.main.java.srcDirs = ["src/"]
+
+dependencies {
+    implementation 'com.github.jafarlihi:eemit:0.1.0'
+    // implementation 'org.riversun:java-promise:1.1.0'
+    implementation 'com.auth0:java-jwt:4.2.1'
+
+}
+repositories {
+    mavenLocal()
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+    maven { url "https://jitpack.io" }
+}

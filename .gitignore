@@ -98,7 +98,7 @@ nb-configuration.xml
 
 /local.properties
 gradle-app.setting
-/.gradle/
+.gradle/
 
 ## OS Specific
 .DS_Store
@@ -113,5 +113,7 @@ Thumbs.db
 /ios/IOSLauncher.app.dSYM
 
 ## Custom
-/old_ui/
-/out/
+old_ui/
+assets/
+out/
+build/
