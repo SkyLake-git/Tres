@@ -3,7 +3,6 @@
 *.class
 *.war
 *.ear
-*.jar
 hs_err_pid*
 
 ## Robovm
@@ -25,9 +24,6 @@ www-test/
 /android/libs/x86/
 /android/libs/x86_64/
 /android/gen/
-.idea/
-*/.idea/
-/server/
 *.ipr
 *.iws
 *.iml
@@ -117,3 +113,6 @@ old_ui/
 assets/
 out/
 build/
+libs/
+/server/
+.idea/
