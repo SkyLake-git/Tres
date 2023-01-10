@@ -7,27 +7,32 @@ import com.tres.network.packet.Serverbound;
 
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * クライアントで生成した共通鍵をサーバーに送信するためのパケット
+ * <p>
+ * ServerToClientHandshakePacket のレスポンス
+ *
+ * @see ServerToClientHandshakePacket
+ */
 public class ClientToServerHandshakePacket extends DataPacket implements Serverbound {
 
+	/**
+	 * 必ず暗号化され、base64エンコードされたSecretKeySpecが格納されている必要があります
+	 */
 	public SecretKeySpec spec;
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		String algorithm = in.readString();
-		int keyLength = in.readInt();
-		byte[] key = new byte[keyLength];
-		for (int i = 0; i < keyLength; i++) {
-			key[i] = in.getStream().readByte();
-		}
+		String algorithm = new String(in.readNBytes());
+		byte[] key = in.readNBytes();
 
 		this.spec = new SecretKeySpec(key, algorithm);
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.spec.getAlgorithm());
-		out.writeInt(this.spec.getEncoded().length);
-		out.getStream().writeBytes(new String(this.spec.getEncoded()));
+		out.writeNBytes(this.spec.getAlgorithm());
+		out.writeNBytes(new String(this.spec.getEncoded()));
 	}
 
 	@Override

@@ -14,13 +14,13 @@ public class PlayerInitializedPacket extends DataPacket implements Clientbound {
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
 		this.runtimeId = in.readInt();
-		this.name = in.readString();
+		this.name = in.readUTFString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
 		out.writeInt(this.runtimeId);
-		out.writeString(this.name);
+		out.writeUTFString(this.name);
 	}
 
 	@Override

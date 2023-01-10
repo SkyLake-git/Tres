@@ -10,9 +10,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class PacketSender {
-	protected ArrayList<Packet> flush;
+	protected final ArrayList<Packet> flush;
 	protected Socket socket;
 
 	protected boolean isClosed;
@@ -65,15 +66,19 @@ public class PacketSender {
 	}
 
 	public void sendFlush() throws CompressException, CryptoException {
-		for (Packet packet : this.flush) {
-			flushPacket(packet);
-		}
+		synchronized (this.flush){
+			for (Packet packet : this.flush) {
+				flushPacket(packet);
+			}
 
-		this.flush.clear();
+			this.flush.clear();
+		}
 	}
 
 	public void sendPacket(Packet packet) {
-		this.flush.add(packet);
+		synchronized (this.flush){
+			this.flush.add(packet);
+		}
 	}
 
 	protected void flushPacket(Packet packet) throws CompressException, CryptoException {

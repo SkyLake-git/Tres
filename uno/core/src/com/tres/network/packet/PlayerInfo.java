@@ -15,11 +15,11 @@ public class PlayerInfo {
 	}
 
 	public void write(PacketEncoder out) throws IOException {
-		out.writeString(this.username);
+		out.writeUTFString(this.username);
 	}
 
 	public static PlayerInfo read(PacketDecoder in) throws IOException {
-		return new PlayerInfo(in.readString());
+		return new PlayerInfo(in.readUTFString());
 	}
 
 }

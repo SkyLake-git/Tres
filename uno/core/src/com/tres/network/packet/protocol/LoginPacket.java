@@ -16,19 +16,19 @@ public class LoginPacket extends DataPacket implements Serverbound {
 	protected void decodePayload(PacketDecoder in) throws Exception {
 		this.protocol = in.readInt();
 		this.version = in.readInt();
-		this.jwtToken = in.readString();
+		this.jwtToken = in.readUTFString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
 		out.writeInt(this.protocol);
 		out.writeInt(this.version);
-		out.writeString(this.jwtToken);
+		out.writeUTFString(this.jwtToken);
 	}
 
 	@Override
 	public String getName() {
-		return "ProtocolPacket";
+		return "LoginPacket";
 	}
 
 	@Override

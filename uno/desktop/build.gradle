@@ -70,6 +70,7 @@ dependencies {
     implementation project(":uno:core")
     implementation 'com.github.jafarlihi:eemit:0.1.0'
     // implementation 'org.riversun:java-promise:1.1.0'
+    implementation 'com.auth0:java-jwt:4.2.1'
     api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
     api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
@@ -86,4 +87,5 @@ dependencies {
     api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
     api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
     api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    implementation'ch.qos.logback:logback-classic:1.1.3'
 }

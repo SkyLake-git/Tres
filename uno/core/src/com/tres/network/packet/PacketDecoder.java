@@ -16,7 +16,7 @@ public class PacketDecoder {
 		return stream;
 	}
 
-	public String readString() throws IOException {
+	public String readUTFString() throws IOException {
 		return this.stream.readUTF();
 	}
 
@@ -40,4 +40,13 @@ public class PacketDecoder {
 		return this.stream.readBoolean();
 	}
 
+	public byte[] readNBytes() throws IOException{
+		int n = this.stream.readInt();
+		byte[] bytes = new byte[n];
+		for (int i = 0; i < n; i++) {
+			bytes[i] = this.getStream().readByte();
+		}
+
+		return bytes;
+	}
 }

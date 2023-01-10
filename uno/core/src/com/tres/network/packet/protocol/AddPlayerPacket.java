@@ -12,13 +12,13 @@ public class AddPlayerPacket extends DataPacket implements Clientbound {
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.name = in.readString();
+		this.name = in.readUTFString();
 		this.runtimeId = in.getStream().readShort();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.name);
+		out.writeUTFString(this.name);
 		out.getStream().writeShort(this.runtimeId);
 	}
 

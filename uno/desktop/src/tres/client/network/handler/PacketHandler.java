@@ -15,4 +15,6 @@ public interface PacketHandler {
 	void handlePlayerInitialized(PlayerInitializedPacket packet);
 
 	void handleGameEvent(GameEventPacket packet);
+
+	void handleServerToClientHandshake(ServerToClientHandshakePacket packet);
 }

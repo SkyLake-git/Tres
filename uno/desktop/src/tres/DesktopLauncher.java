@@ -1,9 +1,10 @@
 package tres;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tres.client.Client;
 import com.tres.utils.Colors;
-import com.tres.utils.MainLogger;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -11,7 +12,7 @@ public class DesktopLauncher {
 	public static Client client;
 
 	public static ApplicationThread applicationThread;
-	protected static MainLogger logger;
+	protected static Logger logger;
 
 	public static void main(String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -21,7 +22,7 @@ public class DesktopLauncher {
 
 		applicationThread = new ApplicationThread(game, config);
 
-		logger = new MainLogger("Launcher");
+		logger = LoggerFactory.getLogger(DesktopLauncher.class);
 		client = new Client();
 		long startMillis = System.currentTimeMillis();
 

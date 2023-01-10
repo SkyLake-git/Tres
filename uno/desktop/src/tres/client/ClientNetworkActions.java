@@ -1,5 +1,10 @@
 package tres.client;
 
+import com.tres.network.packet.cipher.CommonKeyNetworkCipher;
+import com.tres.network.packet.cipher.CryptoException;
+import com.tres.network.packet.cipher.NetworkCipher;
+import com.tres.network.packet.protocol.ClientToServerHandshakePacket;
+import com.tres.network.packet.protocol.ServerToClientHandshakePacket;
 import tres.client.event.packet.DataPacketReceiveEvent;
 import tres.client.network.PacketResponsePromise;
 import com.tres.network.packet.DataPacket;
@@ -8,7 +13,14 @@ import com.tres.network.packet.protocol.RequestAvailableGamesPacket;
 import com.tres.network.packet.protocol.types.AvailableGameInfo;
 import com.tres.promise.Promise;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class ClientNetworkActions {
 
@@ -94,6 +106,24 @@ public class ClientNetworkActions {
 		}
 
 		return p;
+	}
+
+	public void cipherHandshake(SecretKey secretKey, NetworkCipher beforeEncryption){
+
+		byte[] key = secretKey.getEncoded();
+		String algorithm = secretKey.getAlgorithm();
+
+		try {
+			key = Base64.getEncoder().encode(beforeEncryption.encrypt(key));
+			algorithm = Base64.getEncoder().encodeToString(beforeEncryption.encrypt(algorithm.getBytes()));
+		} catch (CryptoException e) {
+			throw new RuntimeException(e);
+		}
+
+		ClientToServerHandshakePacket handshake = new ClientToServerHandshakePacket();
+		handshake.spec = new SecretKeySpec(key, algorithm);
+
+		this.session.sendDataPacket(handshake, true);
 	}
 
 }

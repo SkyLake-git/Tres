@@ -2,6 +2,10 @@ package tres.client;
 
 
 import com.badlogic.gdx.utils.Null;
+import com.tres.network.packet.protocol.DisconnectPacket;
+import com.tres.network.packet.protocol.types.PacketHandlingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tres.client.event.packet.DataPacketReceiveEvent;
 import tres.client.event.packet.DataPacketSendEvent;
 import tres.client.network.handler.InGamePacketHandler;
@@ -14,9 +18,12 @@ import com.tres.network.packet.compression.CompressException;
 import com.tres.network.uno.Player;
 import com.tres.utils.Colors;
 import com.tres.utils.ParameterMethodCaller;
-import com.tres.utils.PrefixedLogger;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
 
 public class ClientSession {
 
@@ -24,9 +31,11 @@ public class ClientSession {
 
 	protected int tick;
 
-	protected PrefixedLogger logger;
+	protected Logger logger;
 
 	protected PacketHandler packetHandler;
+
+	protected SecretKey cipherKey;
 
 	protected PacketSender packetSender;
 
@@ -46,14 +55,36 @@ public class ClientSession {
 		this.packetHandlerCaller = null;
 		this.packetSender = new PacketSender(this.client.getSocket(), new NetworkSettings(true, true));
 		this.setPacketHandler(new InGamePacketHandler(this.client, this));
-		this.logger = new PrefixedLogger("[ClientSession] ", "Client");
+		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.player = null;
+		this.cipherKey = null;
 
 		this.actions = new ClientNetworkActions(this);
 	}
 
 	public ClientNetworkActions getActions() {
 		return actions;
+	}
+
+	public SecretKey generateCipherKey(){
+		KeyGenerator generator;
+
+		try {
+			generator = KeyGenerator.getInstance("AES");
+			generator.init(256);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+
+		return generator.generateKey();
+	}
+
+	public SecretKey getCipherKey() {
+		return cipherKey;
+	}
+
+	public void setCipherKey(SecretKey cipherKey) {
+		this.cipherKey = cipherKey;
 	}
 
 	void tick() {
@@ -94,7 +125,7 @@ public class ClientSession {
 		return tick;
 	}
 
-	public PrefixedLogger getLogger() {
+	public Logger getLogger() {
 		return logger;
 	}
 
@@ -131,6 +162,35 @@ public class ClientSession {
 				this.logger.warn("Packet encryption failed: " + packet.getName());
 				e.printStackTrace();
 			}
+		}
+	}
+
+	protected boolean doClientDisconnect(String reason){
+		if (this.isConnected()){
+			this.client.close();
+
+			if (this.isConnected()){
+				throw new Error("Failed to disconnect");
+			}
+
+			this.logger.info("Client ~ : Disconnected.");
+			return true;
+		}
+
+		return false;
+	}
+
+	public void disconnect(String reason){
+		if (this.isConnected()){
+			DisconnectPacket packet = new DisconnectPacket();
+			packet.reason = reason;
+
+			this.sendDataPacket(packet, true);
+			if (this.doClientDisconnect(reason)) {
+				this.logger.info("Client <> Server: Disconnected.");
+			}
+
+			throw new RuntimeException(); // todo:
 		}
 	}
 
@@ -177,12 +237,15 @@ public class ClientSession {
 		if (packet instanceof Clientbound) {
 			try {
 				this.packetHandlerCaller.call(packet);
-			} catch (RuntimeException e) {
-				this.logger.emergency("Error occurred when trying to invoke a method");
-				this.logger.info(e.toString());
-			} catch (Throwable e) {
-				this.logger.warn("Error occurred whilst invoking method");
-				this.logger.info(e.toString());
+			} catch(IllegalAccessException | InvocationTargetException e){
+				this.disconnect("Internal Client Error (Access, Invocation)");
+				e.printStackTrace();
+			} catch (PacketHandlingException e) {
+				this.disconnect("Packet Processing Error");
+				e.printStackTrace();
+			} catch(Throwable e){
+				this.disconnect("Internal Client Error (T)");
+				e.printStackTrace();
 			}
 
 			this.client.getEventEmitter().emit(new DataPacketReceiveEvent(packet));

@@ -18,7 +18,7 @@ public class PacketBatch {
 				PacketEncoder sub = new PacketEncoder();
 				packet.encode(sub);
 				try {
-					encoder.writeString(sub.getStream().toString());
+					encoder.writeUTFString(sub.getStream().toString());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

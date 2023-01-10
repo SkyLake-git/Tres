@@ -28,7 +28,7 @@ public class PacketEncoder {
 		return stream;
 	}
 
-	public void writeString(String data) throws IOException {
+	public void writeUTFString(String data) throws IOException {
 		this.stream.writeUTF(data);
 	}
 
@@ -38,6 +38,11 @@ public class PacketEncoder {
 
 	public void writeFloat(float v) throws IOException {
 		this.stream.writeFloat(v);
+	}
+
+	public void writeNBytes(String s) throws IOException{
+		this.stream.writeInt(s.length());
+		this.stream.writeBytes(s);
 	}
 
 	public void writeDouble(double v) throws IOException {

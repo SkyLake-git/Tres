@@ -4,9 +4,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 
 /**
  * Tres Application encrypting system.
@@ -17,21 +15,26 @@ public class PublicKeyNetworkCipher extends NetworkCipher {
 	protected Cipher encryptCipher;
 	protected Cipher decryptCipher;
 
-	protected KeyPair keyPair;
+	protected PublicKey publicKey;
+	protected PrivateKey privateKey;
 
-	public PublicKeyNetworkCipher(KeyPair keyPair) {
+	public PublicKeyNetworkCipher(PublicKey publicKey, PrivateKey privateKey) {
+		this.encryptCipher = null;
+		this.decryptCipher = null;
+
 		try {
-			this.encryptCipher = Cipher.getInstance(this.getTransformation());
-			this.decryptCipher = Cipher.getInstance(this.getTransformation());
+			if (publicKey != null) this.encryptCipher = Cipher.getInstance(this.getTransformation());
+			if (privateKey != null) this.decryptCipher = Cipher.getInstance(this.getTransformation());
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new RuntimeException(e);
 		}
 
-		this.keyPair = keyPair;
+		this.publicKey = publicKey;
+		this.privateKey = privateKey;
 
 		try {
-			this.encryptCipher.init(Cipher.ENCRYPT_MODE, this.keyPair.getPublic());
-			this.decryptCipher.init(Cipher.DECRYPT_MODE, this.keyPair.getPrivate());
+			if (this.encryptCipher != null) this.encryptCipher.init(Cipher.ENCRYPT_MODE, this.publicKey);
+			if (this.decryptCipher != null) this.decryptCipher.init(Cipher.DECRYPT_MODE, this.privateKey);
 		} catch (InvalidKeyException e) {
 			throw new RuntimeException(e);
 		}
@@ -44,6 +47,10 @@ public class PublicKeyNetworkCipher extends NetworkCipher {
 
 	@Override
 	public byte[] encrypt(byte[] data) throws CryptoException {
+		if (this.encryptCipher == null){
+			throw new CryptoException("Encrypt not supported: Public Key not provided");
+		}
+
 		try {
 			return this.encryptCipher.doFinal(data);
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
@@ -53,6 +60,10 @@ public class PublicKeyNetworkCipher extends NetworkCipher {
 
 	@Override
 	public byte[] decrypt(byte[] data) throws CryptoException {
+		if (this.decryptCipher == null){
+			throw new CryptoException("Decrypt not supported: Private Key not provided");
+		}
+
 		try {
 			return this.decryptCipher.doFinal(data);
 		} catch (IllegalBlockSizeException | BadPaddingException e) {

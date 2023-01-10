@@ -11,12 +11,12 @@ public class PlayerInfoRequestPacket extends DataPacket implements Serverbound {
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.name = in.readString();
+		this.name = in.readUTFString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.name);
+		out.writeUTFString(this.name);
 	}
 
 	@Override

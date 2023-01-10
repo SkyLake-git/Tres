@@ -9,6 +9,14 @@ import java.security.SecureRandom;
 
 public class CommonKeyNetworkCipher extends NetworkCipher {
 
+	private static final byte[] VECTOR =
+			{
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0,
+					0, 0, 0, 0
+			};
+
 	protected Cipher encryptCipher;
 
 	protected Cipher decryptCipher;
@@ -31,7 +39,7 @@ public class CommonKeyNetworkCipher extends NetworkCipher {
 
 		this.random = new SecureRandom();
 
-		this.randomizeVector();
+		this.vector = new IvParameterSpec(VECTOR);
 
 		try {
 			this.encryptCipher.init(Cipher.ENCRYPT_MODE, this.key, this.vector);

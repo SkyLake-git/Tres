@@ -9,6 +9,6 @@ public class ClientInfo extends PlayerInfo {
 	}
 
 	public static ClientInfo read(PacketDecoder in) throws IOException {
-		return new ClientInfo(in.readString());
+		return new ClientInfo(in.readUTFString());
 	}
 }

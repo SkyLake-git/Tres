@@ -8,12 +8,12 @@ public class DisconnectPacket extends DataPacket implements Clientbound, Serverb
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.reason = in.readString();
+		this.reason = in.readUTFString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.reason);
+		out.writeUTFString(this.reason);
 	}
 
 	@Override

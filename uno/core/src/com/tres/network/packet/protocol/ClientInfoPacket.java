@@ -10,13 +10,13 @@ public class ClientInfoPacket extends DataPacket implements Serverbound {
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.remoteAddress = in.readString();
+		this.remoteAddress = in.readUTFString();
 		this.info = ClientInfo.read(in);
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.remoteAddress);
+		out.writeUTFString(this.remoteAddress);
 		this.info.write(out);
 	}
 

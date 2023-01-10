@@ -1,25 +1,27 @@
 package tres.client;
 
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.tres.event.EventEmitter;
 import com.tres.network.packet.Clientbound;
 import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.cipher.CommonKeyNetworkCipher;
+import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
 import com.tres.network.packet.protocol.PacketPool;
+import com.tres.network.packet.protocol.types.JwtUtils;
 import com.tres.snooze.Sleeper;
 import com.tres.utils.Colors;
 import com.tres.utils.Heartbeat;
-import com.tres.utils.MainLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 
 public class Client implements Heartbeat.Syncable {
 
@@ -29,7 +31,7 @@ public class Client implements Heartbeat.Syncable {
 
 	protected EventEmitter eventEmitter;
 
-	protected MainLogger logger;
+	protected Logger logger;
 
 	protected PacketPool packetPool;
 
@@ -44,13 +46,15 @@ public class Client implements Heartbeat.Syncable {
 
 	protected Sleeper tickSleeper;
 
+	protected String loginJWT;
+
 	public Client() {
 		this.socket = null;
 
 		this.heartbeat = new Heartbeat(20);
 		this.heartbeat.getList().add(this);
 
-		this.logger = new MainLogger("Client");
+		this.logger = LoggerFactory.getLogger(this.getClass());
 
 		this.packetPool = new PacketPool();
 
@@ -67,17 +71,19 @@ public class Client implements Heartbeat.Syncable {
 
 		this.tickSleeper = new Sleeper();
 
-		KeyGenerator generator;
+		this.prepareLoginJWT();
+	}
 
-		try {
-			generator = KeyGenerator.getInstance("AES");
-			generator.init(256);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
+	public String getLoginJWT() {
+		return loginJWT;
+	}
 
-		SecretKey key = generator.generateKey();
-		CommonKeyNetworkCipher cipher = new CommonKeyNetworkCipher(key);
+	public void prepareLoginJWT(){
+		this.loginJWT = JWT.create()
+				.withIssuer(JwtUtils.issuer)
+				.withAudience("server")
+				.withSubject("login")
+				.sign(Algorithm.none());
 	}
 
 	public Sleeper getTickSleeper() {
@@ -119,7 +125,7 @@ public class Client implements Heartbeat.Syncable {
 		return socket;
 	}
 
-	public MainLogger getLogger() {
+	public Logger getLogger() {
 		return logger;
 	}
 
@@ -167,23 +173,32 @@ public class Client implements Heartbeat.Syncable {
 		// this.logger.info("Received: " + new String(data, StandardCharsets.UTF_8));
 
 
-		DataPacket packet = this.packetPool.getPacketFull(data);
-		if (packet != null) {
-			this.handlePacket(packet);
-		} else {
-			byte[] result = null;
-			try {
-				result = ZlibCompressor.getInstance().decompress(data);
-			} catch (CompressException e) {
-				this.logger.warn("Packet decompression failed: " + Arrays.toString(data));
-			}
+		byte[] result = data;
+		//todo: split
 
-			DataPacket packetDecompressed = this.packetPool.getPacketFull(result);
-			if (packetDecompressed != null) {
-				this.handlePacket(packetDecompressed);
-			} else {
-				this.logger.info("Ignored unknown data: " + Arrays.toString(result));
+		if (this.getSession().getCipher() != null){
+			try {
+				result = this.getSession().getCipher().decrypt(result);
+			} catch (CryptoException e) {
+				this.logger.warn("Packet decryption failed: " + Base64.getEncoder().encodeToString(result));
+				e.printStackTrace();
+				return;
 			}
+		}
+
+		try {
+			result = ZlibCompressor.getInstance().decompress(result);
+		} catch (CompressException e) {
+			this.logger.warn("Packet decompression failed: " + Arrays.toString(result));
+			e.printStackTrace();
+			return;
+		}
+
+		DataPacket finalPacket = this.packetPool.getPacketFull(result);
+		if (finalPacket != null) {
+			this.handlePacket(finalPacket);
+		} else {
+			this.logger.info("Ignored unknown data: " + Arrays.toString(result));
 		}
 	}
 

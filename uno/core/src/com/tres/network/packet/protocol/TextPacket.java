@@ -10,14 +10,14 @@ public class TextPacket extends DataPacket implements Serverbound, Clientbound {
 
 	@Override
 	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.message = in.readString();
-		this.sourceName = in.readString();
+		this.message = in.readUTFString();
+		this.sourceName = in.readUTFString();
 	}
 
 	@Override
 	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeString(this.message);
-		out.writeString(this.sourceName);
+		out.writeUTFString(this.message);
+		out.writeUTFString(this.sourceName);
 
 	}
 

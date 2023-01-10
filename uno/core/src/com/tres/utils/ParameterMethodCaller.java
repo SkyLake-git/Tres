@@ -38,7 +38,7 @@ public class ParameterMethodCaller<E> {
 			try {
 				method.invoke(this.target, param);
 			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
+				throw e;
 			} catch (InvocationTargetException e) {
 				throw e.getCause();
 			}
