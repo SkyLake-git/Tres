@@ -88,20 +88,22 @@ public class ChatViewerActor extends Actor {
 
 		Color baseColor = this.font.getColor();
 		int count = 0;
-		for (ChatLog log : this.logs) {
-			count++;
-			CharSequence str = log.content.subSequence(0, Math.min(this.chatView.maxColumn, log.content.length()));
-			if (log.content.length() > this.chatView.maxColumn) {
-				str = str + "...";
-			}
-			float alpha = Math.min(1.0f, log.remain / 0.25f);
-			float mx = -(70 * (1.0f - alpha));
-			this.font.setColor(baseColor.r, baseColor.g, baseColor.b, alpha);
+		synchronized (this.logs){
+			for (ChatLog log : this.logs) {
+				count++;
+				CharSequence str = log.content.subSequence(0, Math.min(this.chatView.maxColumn, log.content.length()));
+				if (log.content.length() > this.chatView.maxColumn) {
+					str = str + "...";
+				}
+				float alpha = Math.min(1.0f, log.remain / 0.25f);
+				float mx = -(70 * (1.0f - alpha));
+				this.font.setColor(baseColor.r, baseColor.g, baseColor.b, alpha);
 
-			this.font.draw(batch, str, getX() + mx, getY() + count * this.font.getLineHeight());
+				this.font.draw(batch, str, getX() + mx, getY() + count * this.font.getLineHeight());
 
-			if (count > this.chatView.lines) {
-				break;
+				if (count > this.chatView.lines) {
+					break;
+				}
 			}
 		}
 	}
