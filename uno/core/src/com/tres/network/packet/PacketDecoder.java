@@ -8,8 +8,15 @@ public class PacketDecoder {
 
 	protected DataInputStream stream;
 
+	protected ByteArrayInputStream internalStream;
+
 	public PacketDecoder(byte[] buffer) {
-		this.stream = new DataInputStream(new ByteArrayInputStream(buffer));
+		this.internalStream = new ByteArrayInputStream(buffer);
+		this.stream = new DataInputStream(this.internalStream);
+	}
+
+	public ByteArrayInputStream getByteArrayInputStream() {
+		return internalStream;
 	}
 
 	public DataInputStream getStream() {

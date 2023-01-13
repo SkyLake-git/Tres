@@ -2,6 +2,7 @@ package tres.client;
 
 
 import com.badlogic.gdx.utils.Null;
+import com.tres.network.SocketIOWrapper;
 import com.tres.network.packet.protocol.DisconnectPacket;
 import com.tres.network.packet.protocol.types.PacketHandlingException;
 import org.slf4j.Logger;
@@ -48,12 +49,15 @@ public class ClientSession {
 	@Null
 	protected NetworkCipher cipher;
 
+	protected SocketIOWrapper ioWrapper;
+
 	ClientSession(Client client) {
 		this.client = client;
 		this.tick = 0;
 		this.cipher = null;
+		this.ioWrapper = new SocketIOWrapper(client.getSocket());
 		this.packetHandlerCaller = null;
-		this.packetSender = new PacketSender(this.client.getSocket(), new NetworkSettings(true, true));
+		this.packetSender = new PacketSender(this.ioWrapper, new NetworkSettings(true, true));
 		this.setPacketHandler(new InGamePacketHandler(this.client, this));
 		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.player = null;
@@ -148,6 +152,7 @@ public class ClientSession {
 	}
 
 	public void sendDataPacket(DataPacket packet, boolean flush) {
+		this.logger.info("Sent: " + packet.getName());
 		this.packetSender.sendPacket(packet);
 
 		this.client.getEventEmitter().emit(new DataPacketSendEvent(packet));
@@ -188,6 +193,7 @@ public class ClientSession {
 			this.sendDataPacket(packet, true);
 			if (this.doClientDisconnect(reason)) {
 				this.logger.info("Client <> Server: Disconnected.");
+				return;
 			}
 
 			throw new RuntimeException(); // todo:

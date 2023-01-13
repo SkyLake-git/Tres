@@ -6,6 +6,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.tres.event.EventEmitter;
 import com.tres.network.packet.Clientbound;
 import com.tres.network.packet.DataPacket;
+import com.tres.network.packet.Packet;
+import com.tres.network.packet.PacketBatch;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -194,11 +197,26 @@ public class Client implements Heartbeat.Syncable {
 			return;
 		}
 
-		DataPacket finalPacket = this.packetPool.getPacketFull(result);
-		if (finalPacket != null) {
-			this.handlePacket(finalPacket);
-		} else {
-			this.logger.info("Ignored unknown data: " + Arrays.toString(result));
+		PacketBatch batch = PacketBatch.from(result);
+
+		ArrayList<Packet> packets;
+		try {
+			packets = batch.getPackets(this.packetPool, 20);
+		} catch (IOException e){
+			e.printStackTrace();
+			return;
+		} catch (Exception e) {
+			this.session.disconnect("Invalid Payload: shortage buffer");
+			return;
+		}
+
+		for (Packet packet : packets) {
+			if (!(packet instanceof DataPacket)){
+				this.logger.warn("Unexpected: not instanceof DataPacket");
+				continue;
+			}
+
+			this.handlePacket((DataPacket) packet);
 		}
 	}
 
@@ -207,7 +225,9 @@ public class Client implements Heartbeat.Syncable {
 			this.logger.info("Invalid packet received: " + packet.getName());
 		}
 
-		this.session.handlePacket(packet);
+		if (this.session.isConnected()){
+			this.session.handlePacket(packet);
+		}
 	}
 
 	public void tick() {

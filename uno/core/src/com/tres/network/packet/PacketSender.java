@@ -1,20 +1,26 @@
 package com.tres.network.packet;
 
 
+import com.tres.network.IOWrapper;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.cipher.NetworkCipher;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.channels.ByteChannel;
+import java.nio.channels.NetworkChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Base64;
 
 public class PacketSender {
 	protected final ArrayList<Packet> flush;
-	protected Socket socket;
+	protected IOWrapper wrapper;
 
 	protected boolean isClosed;
 
@@ -22,12 +28,11 @@ public class PacketSender {
 
 	protected NetworkCipher cipher;
 
-	public PacketSender(Socket socket, NetworkSettings settings) {
-		this.socket = socket;
+	public PacketSender(IOWrapper wrapper, NetworkSettings settings) {
+		this.wrapper = wrapper;
 		this.flush = new ArrayList<>();
 		this.isClosed = false;
 		this.settings = settings;
-		this.cipher = cipher;
 	}
 
 	public NetworkSettings getSettings() {
@@ -67,9 +72,23 @@ public class PacketSender {
 
 	public void sendFlush() throws CompressException, CryptoException {
 		synchronized (this.flush){
-			for (Packet packet : this.flush) {
-				flushPacket(packet);
+			if (this.flush.size() == 0){
+				return;
 			}
+
+			PacketBatch batch = new PacketBatch();
+			for (Packet packet : this.flush) {
+				try {
+					byte[] payload = this.encode(packet);
+
+					batch.write(payload);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+
+			}
+
+			this.output(batch);
 
 			this.flush.clear();
 		}
@@ -81,31 +100,32 @@ public class PacketSender {
 		}
 	}
 
-	protected void flushPacket(Packet packet) throws CompressException, CryptoException {
-		if (this.socket.isClosed() || this.isClosed) {
-			return;
+	protected byte[] encode(Packet packet) throws IOException {
+		if (!this.wrapper.isOpen() || this.isClosed) {
+			throw new IOException("IO wrapper or sender closed.");
 		}
 
 
-		try {
-			OutputStream output = this.socket.getOutputStream();
-			PacketEncoder out = new PacketEncoder();
-			packet.encode(out);
+		PacketEncoder out = new PacketEncoder();
+		packet.encode(out);
 
-			byte[] buffer = out.getByteArrayOutputStream().toByteArray();
 
-			if (this.settings.compression()) {
-				buffer = ZlibCompressor.getInstance().compress(buffer);
-			}
+		return out.getByteArrayOutputStream().toByteArray();
+	}
 
-			if (this.settings.encryption() && this.cipher != null) {
-				buffer = this.cipher.encrypt(buffer);
-			}
+	protected void output(PacketBatch batch) throws CompressException, CryptoException {
 
-			output.write(buffer);
-		} catch (IOException e) {
-			e.printStackTrace();
+		byte[] buffer = batch.getBuffer();
+
+		if (this.settings.compression()) {
+			buffer = ZlibCompressor.getInstance().compress(buffer);
 		}
+
+		if (this.settings.encryption() && this.cipher != null) {
+			buffer = this.cipher.encrypt(buffer);
+		}
+
+		this.wrapper.write(buffer);
 	}
 
 }
