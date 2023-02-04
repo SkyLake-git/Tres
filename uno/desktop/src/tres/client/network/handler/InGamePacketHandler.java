@@ -12,6 +12,7 @@ import com.tres.network.packet.cipher.PublicKeyNetworkCipher;
 import com.tres.network.packet.protocol.*;
 import com.tres.network.packet.protocol.types.JwtUtils;
 import com.tres.network.packet.protocol.types.PacketHandlingException;
+import com.tres.network.uno.NetworkCard;
 import com.tres.utils.Colors;
 import tres.client.Client;
 import tres.client.ClientSession;
@@ -90,7 +91,7 @@ public class InGamePacketHandler extends BasePacketHandler {
 
 	@Override
 	public void handleServerToClientHandshake(ServerToClientHandshakePacket packet) {
-		if (this.session.getPacketSender().getCipher() != null){
+		if (this.session.getPacketSender().getCipher() != null) {
 			this.session.disconnect("Bad Packet: already encrypted");
 			return;
 		}
@@ -124,7 +125,33 @@ public class InGamePacketHandler extends BasePacketHandler {
 
 	}
 
-	protected PublicKey processServerToClientHandshakeJWT(String token){
+	@Override
+	public void handlePlayerGameAction(PlayerGameActionPacket packet) {
+
+	}
+
+	@Override
+	public void handleGameResult(GameResultPacket packet) {
+
+	}
+
+	@Override
+	public void handleCardTransaction(CardTransactionPacket packet) {
+		if (this.session.getPlayer() == null) {
+			return;
+		}
+
+		if (packet.type == CardTransactionPacket.TYPE_ADD) {
+
+			this.session.getPlayer().getCardActions().add(packet.cards.toArray(new NetworkCard[]{}));
+			this.session.getLogger().info("Card transact: Added " + packet.cards.size() + " cards, reason: " + packet.reason);
+		} else if (packet.type == CardTransactionPacket.TYPE_REMOVE) {
+			this.session.getPlayer().getCardActions().remove(packet.cards.stream().mapToInt((card) -> card.runtimeId).toArray());
+			this.session.getLogger().info("Card transact: Removed " + packet.cards.size() + " cards, reason: " + packet.reason);
+		}
+	}
+
+	protected PublicKey processServerToClientHandshakeJWT(String token) {
 		JWTVerifier verifier = JWT.require(Algorithm.none())
 				.withAudience("client")
 				.withSubject("encryption")
@@ -136,7 +163,7 @@ public class InGamePacketHandler extends BasePacketHandler {
 		DecodedJWT jwt;
 		try {
 			jwt = verifier.verify(token);
-		} catch (JWTVerificationException e){
+		} catch (JWTVerificationException e) {
 			throw new PacketHandlingException(e);
 		}
 
