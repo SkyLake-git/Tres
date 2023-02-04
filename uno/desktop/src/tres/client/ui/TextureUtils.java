@@ -2,6 +2,7 @@ package tres.client.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -13,5 +14,9 @@ public class TextureUtils {
 
 	public static Vector2 getCenter(Actor actor) {
 		return new Vector2(actor.getX() + actor.getWidth() / 2, actor.getY() + actor.getHeight() / 2);
+	}
+
+	public static void drawCenterFont(Batch batch, BitmapFont font, CharSequence str, float x, float y){
+		font.draw(batch, str,x - font.getRegion().getRegionWidth() / 2f , y + font.getRegion().getRegionHeight() / 2f);
 	}
 }
