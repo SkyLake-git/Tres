@@ -1,10 +1,8 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
+import com.tres.network.packet.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class GameLevelPacket extends DataPacket implements Clientbound {
@@ -17,13 +15,9 @@ public class GameLevelPacket extends DataPacket implements Clientbound {
 	public int deckCards;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 		this.gameId = in.readInt();
-		this.players = new ArrayList<>();
-		int length = in.readInt();
-		for (int i = 0; i < length; i++) {
-			this.players.add(in.getStream().readShort());
-		}
+		this.players = in.produceArrayList((current) -> in.readShort());
 
 		this.turnPlayer = in.getStream().readShort();
 		this.turnCount = in.readInt();
@@ -31,12 +25,10 @@ public class GameLevelPacket extends DataPacket implements Clientbound {
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 		out.writeInt(this.gameId);
-		out.getStream().writeInt(this.players.size());
-		for (short runtimeId : this.players) {
-			out.getStream().writeShort(runtimeId);
-		}
+
+		out.consumeArrayList(this.players, out::writeShort);
 
 		out.getStream().writeShort(this.turnPlayer);
 		out.writeInt(this.turnCount);
