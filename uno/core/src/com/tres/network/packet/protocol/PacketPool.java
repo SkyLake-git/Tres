@@ -2,6 +2,7 @@ package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.PacketDecoder;
+import com.tres.network.packet.PacketProcessingException;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -28,13 +29,16 @@ public class PacketPool {
 		this.register(new GameEventPacket());
 		this.register(new GameLevelPacket());
 		this.register(new AddPlayerPacket());
-		this.register(new CardActionPacket());
+		this.register(new CardTransactionPacket());
 		this.register(new RequestAvailableGamesPacket());
 		this.register(new AvailableGamesPacket());
 		this.register(new PlayerActionPacket());
 		this.register(new PlayerActionResponsePacket());
 		this.register(new ClientToServerHandshakePacket());
 		this.register(new ServerToClientHandshakePacket());
+		this.register(new CardListPacket());
+		this.register(new GameResultPacket());
+		this.register(new PlayerGameActionPacket());
 	}
 
 	public void register(DataPacket packet) {
@@ -59,25 +63,23 @@ public class PacketPool {
 		return null;
 	}
 
-	public DataPacket getPacket(byte[] buffer) {
+	public DataPacket getPacket(byte[] buffer) throws IOException {
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(buffer.clone()));
-		try {
-			int pid = stream.readShort();
-			return this.getPacketById(pid);
-		} catch (IOException e) {
-			return null;
-		}
+		int pid = stream.readShort();
+		return this.getPacketById(pid);
 	}
 
-	public DataPacket getPacketFull(byte[] buffer) {
-		DataPacket packet = this.getPacket(buffer);
+	public DataPacket getPacketFull(byte[] buffer) throws PacketProcessingException {
+		DataPacket packet = null;
+		try {
+			packet = this.getPacket(buffer);
+		} catch (IOException e) {
+			throw new PacketProcessingException(e);
+		}
+
 		if (packet != null) {
 			PacketDecoder in = new PacketDecoder(buffer);
-			try {
-				packet.decode(in);
-			} catch (Exception e) {
-				return null;
-			}
+			packet.decode(in);
 
 			return packet;
 		}
