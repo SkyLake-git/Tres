@@ -34,7 +34,7 @@ public class LinearLayout extends Layout {
 
 	@Override
 	public void set(Actor actor, int index) {
-		float percentage = index / Math.max(1, this.actors.size() - 1);
+		float percentage = index / (float) Math.max(1, this.actors.size() - 1);
 
 		float x = this.position.x;
 		float y = this.position.y;

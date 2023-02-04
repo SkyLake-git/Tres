@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import tres.client.ui.layout.attachment.LayoutAttachment;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 abstract public class Layout {
 
@@ -25,6 +26,30 @@ abstract public class Layout {
 		this.actors = new ArrayList<>();
 	}
 
+	public Vector2 getPosition() {
+		return position;
+	}
+
+	public void setPosition(Vector2 position) {
+		this.position = position;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
 	public ArrayList<Actor> getActors() {
 		return actors;
 	}
@@ -41,6 +66,11 @@ abstract public class Layout {
 
 	public void add(Actor actor) {
 		this.actors.add(actor);
+		this.update();
+	}
+
+	public void addAll(Collection<? extends Actor> actors) {
+		this.actors.addAll(actors);
 		this.update();
 	}
 
