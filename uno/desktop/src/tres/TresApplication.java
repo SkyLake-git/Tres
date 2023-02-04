@@ -13,13 +13,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.tres.network.packet.DataPacket;
+import com.tres.snooze.Sleeper;
+import tres.client.Client;
 import tres.client.event.packet.DataPacketReceiveEvent;
 import tres.client.event.packet.DataPacketSendEvent;
+import tres.client.ui.CardTextures;
 import tres.client.ui.WorldUtils;
 import tres.client.ui.actor.ChatViewerActor;
-import com.tres.network.packet.DataPacket;
 import tres.sequence.SettingsScreen;
-import com.tres.snooze.Sleeper;
 
 public class TresApplication extends Game {
 
@@ -36,6 +38,8 @@ public class TresApplication extends Game {
 	protected Sleeper renderSleeper;
 
 	protected ChatViewerActor packetLog;
+
+	protected Client client;
 
 	public TresApplication(Lwjgl3ApplicationConfiguration config) {
 		this.settings = new TresApplicationSettings();
@@ -55,6 +59,9 @@ public class TresApplication extends Game {
 		this.font = new BitmapFont();
 		this.shapeRenderer = new ShapeRenderer();
 		this.renderSleeper = new Sleeper();
+
+		CardTextures.init();
+		
 		this.packetLog = new ChatViewerActor(
 				new Vector2(5, this.debugViewport.getScreenHeight() + 50),
 				new ChatViewerActor.ChatView(
@@ -66,7 +73,9 @@ public class TresApplication extends Game {
 				)
 		);
 
-		DesktopLauncher.client.getEventEmitter().on(DataPacketReceiveEvent.class, (channel, event) -> {
+		this.client = DesktopLauncher.client;
+
+		this.client.getEventEmitter().on(DataPacketReceiveEvent.class, (channel, event) -> {
 			DataPacket packet = event.getPacket();
 			synchronized (this.packetLog) {
 				this.packetLog.addLog(new ChatViewerActor.ChatLog(
@@ -76,7 +85,7 @@ public class TresApplication extends Game {
 			}
 		});
 
-		DesktopLauncher.client.getEventEmitter().on(DataPacketSendEvent.class, (channel, event) -> {
+		this.client.getEventEmitter().on(DataPacketSendEvent.class, (channel, event) -> {
 			DataPacket packet = event.getPacket();
 			synchronized (this.packetLog) {
 				this.packetLog.addLog(new ChatViewerActor.ChatLog(
@@ -85,6 +94,10 @@ public class TresApplication extends Game {
 				));
 			}
 		});
+	}
+
+	public Client getClient() {
+		return client;
 	}
 
 	public Sleeper getRenderSleeper() {
@@ -187,7 +200,6 @@ public class TresApplication extends Game {
 	@Override
 	public void dispose() {
 		super.dispose();
-
 		this.isDisposed = true;
 	}
 
