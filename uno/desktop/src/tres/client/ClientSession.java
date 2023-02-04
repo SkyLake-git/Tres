@@ -3,8 +3,15 @@ package tres.client;
 
 import com.badlogic.gdx.utils.Null;
 import com.tres.network.SocketIOWrapper;
+import com.tres.network.packet.*;
+import com.tres.network.packet.cipher.CryptoException;
+import com.tres.network.packet.cipher.NetworkCipher;
+import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.protocol.DisconnectPacket;
 import com.tres.network.packet.protocol.types.PacketHandlingException;
+import com.tres.network.uno.Player;
+import com.tres.utils.Colors;
+import com.tres.utils.ParameterMethodCaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tres.client.event.packet.DataPacketReceiveEvent;
@@ -12,13 +19,6 @@ import tres.client.event.packet.DataPacketSendEvent;
 import tres.client.network.handler.InGamePacketHandler;
 import tres.client.network.handler.PacketHandler;
 import tres.client.uno.ClientPlayer;
-import com.tres.network.packet.*;
-import com.tres.network.packet.cipher.CryptoException;
-import com.tres.network.packet.cipher.NetworkCipher;
-import com.tres.network.packet.compression.CompressException;
-import com.tres.network.uno.Player;
-import com.tres.utils.Colors;
-import com.tres.utils.ParameterMethodCaller;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -70,7 +70,7 @@ public class ClientSession {
 		return actions;
 	}
 
-	public SecretKey generateCipherKey(){
+	public SecretKey generateCipherKey() {
 		KeyGenerator generator;
 
 		try {
@@ -108,6 +108,9 @@ public class ClientSession {
 		} catch (CryptoException e) {
 			this.logger.info("Packet encryption failed: tick flush");
 			this.client.close();
+		} catch (PacketProcessingException e) {
+			this.logger.info("Packet processing failed: tick flush");
+			this.client.close();
 		}
 	}
 
@@ -115,6 +118,10 @@ public class ClientSession {
 		if (this.player == null) {
 			this.player = new ClientPlayer(Player.nextRuntimeId(), info);
 		}
+	}
+
+	public ClientPlayer getPlayer() {
+		return player;
 	}
 
 	public boolean isConnected() {
@@ -166,15 +173,18 @@ public class ClientSession {
 			} catch (CryptoException e) {
 				this.logger.warn("Packet encryption failed: " + packet.getName());
 				e.printStackTrace();
+			} catch (PacketProcessingException e) {
+				this.logger.info("Packet processing failed: " + packet.getName());
+				e.printStackTrace();
 			}
 		}
 	}
 
-	protected boolean doClientDisconnect(String reason){
-		if (this.isConnected()){
+	protected boolean doClientDisconnect(String reason) {
+		if (this.isConnected()) {
 			this.client.close();
 
-			if (this.isConnected()){
+			if (this.isConnected()) {
 				throw new Error("Failed to disconnect");
 			}
 
@@ -185,8 +195,8 @@ public class ClientSession {
 		return false;
 	}
 
-	public void disconnect(String reason){
-		if (this.isConnected()){
+	public void disconnect(String reason) {
+		if (this.isConnected()) {
 			DisconnectPacket packet = new DisconnectPacket();
 			packet.reason = reason;
 
@@ -243,13 +253,13 @@ public class ClientSession {
 		if (packet instanceof Clientbound) {
 			try {
 				this.packetHandlerCaller.call(packet);
-			} catch(IllegalAccessException | InvocationTargetException e){
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				this.disconnect("Internal Client Error (Access, Invocation)");
 				e.printStackTrace();
 			} catch (PacketHandlingException e) {
 				this.disconnect("Packet Processing Error");
 				e.printStackTrace();
-			} catch(Throwable e){
+			} catch (Throwable e) {
 				this.disconnect("Internal Client Error (T)");
 				e.printStackTrace();
 			}
