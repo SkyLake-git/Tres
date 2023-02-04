@@ -4,10 +4,7 @@ package tres.client;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.tres.event.EventEmitter;
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.Packet;
-import com.tres.network.packet.PacketBatch;
+import com.tres.network.packet.*;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
@@ -205,8 +202,9 @@ public class Client implements Heartbeat.Syncable {
 		} catch (IOException e){
 			e.printStackTrace();
 			return;
-		} catch (Exception e) {
-			this.session.disconnect("Invalid Payload: shortage buffer");
+		} catch (PacketProcessingException e) {
+			e.printStackTrace();
+			this.session.disconnect("Packet Processing Error");
 			return;
 		}
 

@@ -55,7 +55,7 @@ public class PacketSender {
 		if (flush) {
 			try {
 				this.sendFlush();
-			} catch (CompressException | CryptoException e) {
+			} catch (CompressException | CryptoException | PacketProcessingException ignored) {
 			}
 		}
 
@@ -66,11 +66,11 @@ public class PacketSender {
 		this.close(true);
 	}
 
-	public void tick() throws CompressException, CryptoException {
+	public void tick() throws CompressException, CryptoException, PacketProcessingException {
 		this.sendFlush();
 	}
 
-	public void sendFlush() throws CompressException, CryptoException {
+	public void sendFlush() throws CompressException, CryptoException, PacketProcessingException {
 		synchronized (this.flush){
 			if (this.flush.size() == 0){
 				return;
@@ -100,7 +100,7 @@ public class PacketSender {
 		}
 	}
 
-	protected byte[] encode(Packet packet) throws IOException {
+	protected byte[] encode(Packet packet) throws IOException, PacketProcessingException {
 		if (!this.wrapper.isOpen() || this.isClosed) {
 			throw new IOException("IO wrapper or sender closed.");
 		}

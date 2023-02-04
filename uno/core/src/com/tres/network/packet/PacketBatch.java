@@ -41,19 +41,16 @@ public class PacketBatch {
 		return batch;
 	}
 
-	public ArrayList<Packet> getPackets(PacketPool packetPool, int max) throws Exception {
+	public ArrayList<Packet> getPackets(PacketPool packetPool, int max) throws IOException, PacketProcessingException {
 		ArrayList<Packet> packets = new ArrayList<>();
 		int offset = 0;
 		ByteBuffer buffer = ByteBuffer.wrap(this.getBuffer());
+
 		for (int i = 0; i < max; i ++){
 			byte[] buf = new byte[buffer.remaining()];
 			buffer.get(buf);
-			DataPacket packet = packetPool.getPacket(buf); // packet pool の仕様のせいで実質 ArrayList<DataPacket>
 
-			// packet が null の場合、batchの中のbufferがおかしい
-			if (packet == null){
-				throw new Exception("invalid buffer");
-			}
+			DataPacket packet = packetPool.getPacket(buf);
 
 			PacketDecoder decoder = new PacketDecoder(buf);
 			int beforeAvailable = decoder.getStream().available();
@@ -70,6 +67,8 @@ public class PacketBatch {
 			if (buffer.remaining() == 0){
 				break;
 			}
+
+			// fixme: 異常なパケットがあると例外がスローされて他のパケットはデコードしようとしない
 		}
 
 		return packets;
