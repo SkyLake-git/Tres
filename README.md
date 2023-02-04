@@ -5,10 +5,13 @@ UNOというカードゲームをネットワーク上でプレイできるプ�
 クライアント側とサーバー側がありますが、ここで公開しているプログラムはクライアント側です。  
 
 ## Requirements
-Java >= 8
+Java version: 8 以上
 
-## OS
+## 動作環境
 Windows [x86] (Recommended)  
 MacOS [arm32,arm64]  
 Linux [arm32,arm64]  
 Windows向けに作成していますが、おそらくこれらのOSでも動作するはずです。
+
+### サポート予定
+Browser
