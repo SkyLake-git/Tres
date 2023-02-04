@@ -1,8 +1,12 @@
 package com.tres.network.packet;
 
+import com.tres.utils.AbsorbFunction;
+import com.tres.utils.AbsorbSupplier;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class PacketDecoder {
 
@@ -35,6 +39,10 @@ public class PacketDecoder {
 		return this.stream.readLong();
 	}
 
+	public short readShort() throws IOException {
+		return this.stream.readShort();
+	}
+
 	public double readDouble() throws IOException {
 		return this.stream.readDouble();
 	}
@@ -47,7 +55,7 @@ public class PacketDecoder {
 		return this.stream.readBoolean();
 	}
 
-	public byte[] readNBytes() throws IOException{
+	public byte[] readNBytes() throws IOException {
 		int n = this.stream.readInt();
 		byte[] bytes = new byte[n];
 		for (int i = 0; i < n; i++) {
@@ -55,5 +63,45 @@ public class PacketDecoder {
 		}
 
 		return bytes;
+	}
+
+	public <T> T readIf(AbsorbSupplier<T> supplier, T defaultValue) throws IOException {
+		if (this.readBoolean()) {
+			try {
+				return supplier.get();
+			} catch (IOException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return defaultValue;
+	}
+
+	public short readNaturalShort() throws IOException {
+		return this.readIf(this::readShort, (short) -1);
+	}
+
+	public int readNaturalInteger() throws IOException {
+		return this.readIf(this::readInt, -1);
+	}
+
+	public <T> ArrayList<T> produceArrayList(AbsorbFunction<Integer, T> producer) throws IOException {
+		int size = this.readInt();
+
+		ArrayList<T> list = new ArrayList<>();
+
+		for (int i = 0; i < size; i++) {
+			try {
+				list.add(producer.apply(i));
+			} catch (IOException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		return list;
 	}
 }
