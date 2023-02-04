@@ -14,7 +14,7 @@ abstract public class Player {
 
 	public Player(short runtimeId) {
 		this.runtimeId = runtimeId;
-		this.cards = new CardInfo(this);
+		this.cards = new CardInfo();
 	}
 
 	public CardInfo getCards() {
