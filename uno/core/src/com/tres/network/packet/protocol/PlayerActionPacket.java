@@ -1,10 +1,10 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
-import com.tres.network.packet.Serverbound;
+import com.tres.network.packet.*;
 import com.tres.network.packet.protocol.types.PlayerAction;
+import com.tres.utils.Utils;
+
+import java.io.IOException;
 
 public class PlayerActionPacket extends DataPacket implements Serverbound {
 
@@ -13,12 +13,9 @@ public class PlayerActionPacket extends DataPacket implements Serverbound {
 	public int gameId = -1;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
-		int actionValue = in.readInt();
-		this.action = PlayerAction.actionOf(actionValue);
-		if (this.action == null) {
-			throw new Exception("Action \"" + actionValue + "\" not found");
-		}
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
+		int actionOrdinal = in.readInt();
+		this.action = Utils.getEnumOrdinal(PlayerAction.class, actionOrdinal);
 
 		boolean hasGameId = in.readBoolean();
 		if (hasGameId) {
@@ -27,8 +24,8 @@ public class PlayerActionPacket extends DataPacket implements Serverbound {
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeInt(this.action.id);
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
+		out.writeInt(this.action.ordinal());
 
 		boolean hasGameId = this.gameId > -1;
 		out.writeBoolean(hasGameId);
