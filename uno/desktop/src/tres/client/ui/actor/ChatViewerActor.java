@@ -76,7 +76,9 @@ public class ChatViewerActor extends Actor {
 	}
 
 	public void addLog(ChatLog log) {
-		this.logs.add(log);
+		synchronized (this.logs) {
+			this.logs.add(log);
+		}
 	}
 
 	@Override
@@ -88,7 +90,7 @@ public class ChatViewerActor extends Actor {
 
 		Color baseColor = this.font.getColor();
 		int count = 0;
-		synchronized (this.logs){
+		synchronized (this.logs) {
 			for (ChatLog log : this.logs) {
 				count++;
 				CharSequence str = log.content.subSequence(0, Math.min(this.chatView.maxColumn, log.content.length()));
