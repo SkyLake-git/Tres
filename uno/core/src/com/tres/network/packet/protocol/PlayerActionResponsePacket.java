@@ -1,18 +1,20 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
+import com.tres.network.packet.*;
 
+import java.io.IOException;
+
+/**
+ * @deprecated
+ */
 public class PlayerActionResponsePacket extends DataPacket implements Clientbound {
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 
 	}
 
