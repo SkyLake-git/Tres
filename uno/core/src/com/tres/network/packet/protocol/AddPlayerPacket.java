@@ -1,24 +1,23 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
+import com.tres.network.packet.*;
+
+import java.io.IOException;
 
 public class AddPlayerPacket extends DataPacket implements Clientbound {
 
-	public String name;
+	public PlayerInfo info;
 	public short runtimeId;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
-		this.name = in.readUTFString();
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
+		this.info = PlayerInfo.read(in);
 		this.runtimeId = in.getStream().readShort();
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
-		out.writeUTFString(this.name);
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
+		this.info.write(out);
 		out.getStream().writeShort(this.runtimeId);
 	}
 
