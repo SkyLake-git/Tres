@@ -1,9 +1,8 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
+import com.tres.network.packet.*;
+
+import java.io.IOException;
 
 /**
  * 公開鍵などの情報をクライアントに送信するためのパケット
@@ -14,12 +13,12 @@ public class ServerToClientHandshakePacket extends DataPacket implements Clientb
 	public String jwtToken;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 		this.jwtToken = in.readUTFString();
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 		out.writeUTFString(this.jwtToken);
 	}
 
