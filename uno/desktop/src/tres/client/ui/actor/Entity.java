@@ -19,18 +19,6 @@ abstract public class Entity extends Actor {
 
 	abstract protected void init();
 
-	@Override
-	protected void scaleChanged() {
-		super.scaleChanged();
-
-		this.onResize();
-	}
-
-
-	abstract protected void onResize();
-
-	abstract public void recreate();
-
 	public void updateMovement(float delta) {
 
 		if (Math.abs(this.motion.x) < 1e-6) {
