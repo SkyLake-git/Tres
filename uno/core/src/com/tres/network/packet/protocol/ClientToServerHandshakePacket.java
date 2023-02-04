@@ -1,11 +1,9 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
-import com.tres.network.packet.Serverbound;
+import com.tres.network.packet.*;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 
 /**
  * クライアントで生成した共通鍵をサーバーに送信するためのパケット
@@ -22,7 +20,7 @@ public class ClientToServerHandshakePacket extends DataPacket implements Serverb
 	public SecretKeySpec spec;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 		String algorithm = new String(in.readNBytes());
 		byte[] key = in.readNBytes();
 
@@ -30,7 +28,7 @@ public class ClientToServerHandshakePacket extends DataPacket implements Serverb
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 		out.writeNBytes(this.spec.getAlgorithm());
 		out.writeNBytes(new String(this.spec.getEncoded()));
 	}
