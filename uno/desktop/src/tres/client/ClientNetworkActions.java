@@ -1,24 +1,20 @@
 package tres.client;
 
-import com.tres.network.packet.cipher.CommonKeyNetworkCipher;
+import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.cipher.NetworkCipher;
-import com.tres.network.packet.protocol.ClientToServerHandshakePacket;
-import com.tres.network.packet.protocol.ServerToClientHandshakePacket;
-import tres.client.event.packet.DataPacketReceiveEvent;
-import tres.client.network.PacketResponsePromise;
-import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.protocol.AvailableGamesPacket;
+import com.tres.network.packet.protocol.ClientToServerHandshakePacket;
+import com.tres.network.packet.protocol.PlayerActionPacket;
 import com.tres.network.packet.protocol.RequestAvailableGamesPacket;
 import com.tres.network.packet.protocol.types.AvailableGameInfo;
+import com.tres.network.packet.protocol.types.PlayerAction;
 import com.tres.promise.Promise;
+import tres.client.event.packet.DataPacketReceiveEvent;
+import tres.client.network.PacketResponsePromise;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Base64;
 
@@ -108,7 +104,16 @@ public class ClientNetworkActions {
 		return p;
 	}
 
-	public void cipherHandshake(SecretKey secretKey, NetworkCipher beforeEncryption){
+	public void requestJoinGame(int id) {
+		PlayerActionPacket packet = new PlayerActionPacket();
+		packet.gameId = id;
+		packet.action = PlayerAction.JOIN_GAME;
+
+		this.session.sendDataPacket(packet);
+	}
+
+
+	public void cipherHandshake(SecretKey secretKey, NetworkCipher beforeEncryption) {
 
 		byte[] key = secretKey.getEncoded();
 		String algorithm = secretKey.getAlgorithm();
