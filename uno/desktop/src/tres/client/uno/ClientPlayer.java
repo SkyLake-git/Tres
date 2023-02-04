@@ -1,15 +1,15 @@
 package tres.client.uno;
 
 import com.tres.network.packet.PlayerInfo;
+import com.tres.network.uno.CardInfo;
 import com.tres.network.uno.CardList;
-import com.tres.network.uno.NetworkCard;
 import com.tres.network.uno.Player;
 
 public class ClientPlayer extends Player {
 
-	protected CardAssistant cardAssistant;
-
 	protected CardList cards;
+
+	protected PlayerCardActions cardActions;
 
 	protected PlayerInfo info;
 
@@ -17,14 +17,14 @@ public class ClientPlayer extends Player {
 
 	public ClientPlayer(short runtimeId, PlayerInfo info) {
 		super(runtimeId);
-		this.cardAssistant = new CardAssistant(this);
-		this.cards = new CardList(this);
+		this.cards = new CardList();
+		this.cardActions = new PlayerCardActions(this);
 		this.info = info;
 		this.displayName = info.getUsername();
 	}
 
-	public CardAssistant getCardAssistant() {
-		return cardAssistant;
+	public PlayerCardActions getCardActions() {
+		return cardActions;
 	}
 
 	public String getName() {
@@ -35,21 +35,12 @@ public class ClientPlayer extends Player {
 		return this.displayName;
 	}
 
-	public void refreshCardAssistant() {
-	}
-
-	public void addCard(NetworkCard card) {
-		this.cards.add(card);
-		this.refreshCardAssistant();
-	}
-
-	public void removeCard(int runtimeId) {
-		this.cards.remove(runtimeId);
-		this.refreshCardAssistant();
-	}
-
 	@Override
-	public CardList getCards() {
-		return this.cards;
+	public CardInfo getCards() {
+		return (CardInfo) this.cards;
+	}
+
+	CardList getCardList() {
+		return (CardList) this.cards;
 	}
 }
