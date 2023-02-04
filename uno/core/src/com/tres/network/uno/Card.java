@@ -1,6 +1,88 @@
 package com.tres.network.uno;
 
+import com.tres.network.uno.rule.CardRule;
+import com.tres.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class Card {
+
+	private static HashMap<Symbol, ArrayList<Color>> validPatterns = null;
+
+	private static HashMap<Symbol, ArrayList<Color>> creatablePatterns = null;
+
+
+	static {
+		validPatterns = new HashMap<>();
+		creatablePatterns = new HashMap<>();
+		ArrayList<Color> normalColors = Utils.toArrayList(new Color[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW});
+		ArrayList<Color> wildColor = new ArrayList<>();
+
+		wildColor.add(Color.BLACK);
+
+		validPatterns.put(Symbol.ZERO, normalColors);
+		validPatterns.put(Symbol.ONE, normalColors);
+		validPatterns.put(Symbol.TWO, normalColors);
+		validPatterns.put(Symbol.THREE, normalColors);
+		validPatterns.put(Symbol.FOUR, normalColors);
+		validPatterns.put(Symbol.FIVE, normalColors);
+		validPatterns.put(Symbol.SIX, normalColors);
+		validPatterns.put(Symbol.SEVEN, normalColors);
+		validPatterns.put(Symbol.EIGHT, normalColors);
+		validPatterns.put(Symbol.NINE, normalColors);
+		validPatterns.put(Symbol.SKIP, normalColors);
+		validPatterns.put(Symbol.REVERSE, normalColors);
+		validPatterns.put(Symbol.WILD, Utils.toArrayList(new Color[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.BLACK}));
+		validPatterns.put(Symbol.WILD_DRAW, wildColor);
+		validPatterns.put(Symbol.DRAW, normalColors);
+
+		creatablePatterns.put(Symbol.ZERO, normalColors);
+		creatablePatterns.put(Symbol.ONE, normalColors);
+		creatablePatterns.put(Symbol.TWO, normalColors);
+		creatablePatterns.put(Symbol.THREE, normalColors);
+		creatablePatterns.put(Symbol.FOUR, normalColors);
+		creatablePatterns.put(Symbol.FIVE, normalColors);
+		creatablePatterns.put(Symbol.SIX, normalColors);
+		creatablePatterns.put(Symbol.SEVEN, normalColors);
+		creatablePatterns.put(Symbol.EIGHT, normalColors);
+		creatablePatterns.put(Symbol.NINE, normalColors);
+		creatablePatterns.put(Symbol.SKIP, normalColors);
+		creatablePatterns.put(Symbol.REVERSE, normalColors);
+		creatablePatterns.put(Symbol.WILD, wildColor);
+		creatablePatterns.put(Symbol.WILD_DRAW, wildColor);
+		creatablePatterns.put(Symbol.DRAW, normalColors);
+	}
+
+	public static ArrayList<Card> getCards(CardRule rule) {
+		ArrayList<Card> allPattern = new ArrayList<>();
+
+		// moved from old(python) code
+		ArrayList<Integer> numbers = new ArrayList<>();
+		for (int i = 0; i < 2; i++) {
+			numbers.addAll(IntStream.range(1, 9 + 1).boxed().collect(Collectors.toList()));
+		}
+		numbers.add(0);
+
+		// reverse / skip / draw x2
+		numbers.addAll(Arrays.stream(new int[]{14, 14, 11, 11, 10, 10}).boxed().collect(Collectors.toList()));
+
+		// wild draw/change color
+		numbers.addAll(Arrays.stream(new int[]{12, 12, 12, 12, 13, 13}).boxed().collect(Collectors.toList()));
+
+		for (int symbolOrdinal : numbers) {
+			Symbol symbol = Utils.getEnumOrdinal(Symbol.class, symbolOrdinal);
+
+			for (Color color : creatablePatterns.get(symbol)) {
+				allPattern.add(new Card(symbol, color));
+			}
+		}
+
+		return allPattern;
+	}
 
 	public enum Color {
 		RED("赤"),
@@ -35,6 +117,10 @@ public class Card {
 
 			return "unknown";
 		}
+
+		public boolean isValid() {
+			return !this.toEnglishName().equals("unknown");
+		}
 	}
 
 	public enum Symbol {
@@ -60,10 +146,27 @@ public class Card {
 			this.i = i;
 		}
 
-		public static boolean isWild(Symbol symbol) {
-			return (symbol.i == WILD.i) || (symbol.i == WILD_DRAW.i);
+		public boolean isWild() {
+			return this.orEquals(Symbol.WILD, Symbol.WILD_DRAW);
 		}
 
+		public boolean orEquals(Symbol... symbols) {
+			for (Symbol t : symbols) {
+				if (this.equals(t)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static Symbol fromNumber(int number) {
+			if (number > 9) {
+				throw new RuntimeException("number must lower than 9");
+			}
+
+			return values()[number];
+		}
 
 		@Override
 		public String toString() {
@@ -82,26 +185,22 @@ public class Card {
 			} else if (this.equals(DRAW)) {
 				return "draw";
 			}
-			
+
 
 			return "unknown";
+		}
+
+		public boolean isValid() {
+			return true; // todo: always return true
 		}
 	}
 
 	public Symbol symbol;
 	public Color color;
 
-	Card(Symbol symbol, Color color) {
+	public Card(Symbol symbol, Color color) {
 		this.symbol = symbol;
 		this.color = color;
-	}
-
-	boolean canPlay(Card surface) {
-		return this.canPlay(surface.symbol, surface.color);
-	}
-
-	boolean canPlay(Symbol symbol, Color color) {
-		return symbol.i == this.symbol.i && color.trans == this.color.trans;
 	}
 
 	public Symbol getSymbol() {
@@ -110,5 +209,9 @@ public class Card {
 
 	public Color getColor() {
 		return color;
+	}
+
+	public boolean isValidCombination() {
+		return validPatterns.get(this.symbol).contains(this.color);
 	}
 }
