@@ -40,7 +40,7 @@ public class DesktopLauncher {
 			}
 
 			// updateRPC(startMillis);
-			if (client.isClosed() || applicationThread.isDisposed()) {
+			if (client.isClosed() || (applicationThread.isDisposed() && applicationThread.getApplication().isDisposed())) {
 				logger.warn("Detected client/application thread closed");
 
 				logger.info(Colors.wrap("Fetching status...", Colors.YELLOW_BOLD_BRIGHT));
