@@ -1,9 +1,8 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
-import com.tres.network.packet.Serverbound;
+import com.tres.network.packet.*;
+
+import java.io.IOException;
 
 public class LoginPacket extends DataPacket implements Serverbound {
 
@@ -13,14 +12,14 @@ public class LoginPacket extends DataPacket implements Serverbound {
 	public String jwtToken = "";
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 		this.protocol = in.readInt();
 		this.version = in.readInt();
 		this.jwtToken = in.readUTFString();
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 		out.writeInt(this.protocol);
 		out.writeInt(this.version);
 		out.writeUTFString(this.jwtToken);
