@@ -1,9 +1,8 @@
 package com.tres.network.packet.protocol;
 
-import com.tres.network.packet.Clientbound;
-import com.tres.network.packet.DataPacket;
-import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.PacketEncoder;
+import com.tres.network.packet.*;
+
+import java.io.IOException;
 
 public class LoginStatusPacket extends DataPacket implements Clientbound {
 
@@ -14,12 +13,12 @@ public class LoginStatusPacket extends DataPacket implements Clientbound {
 	public int status;
 
 	@Override
-	protected void decodePayload(PacketDecoder in) throws Exception {
+	protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException {
 		this.status = in.readInt();
 	}
 
 	@Override
-	protected void encodePayload(PacketEncoder out) throws Exception {
+	protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException {
 		out.writeInt(this.status);
 	}
 
