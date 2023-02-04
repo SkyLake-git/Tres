@@ -17,4 +17,10 @@ public interface PacketHandler {
 	void handleGameEvent(GameEventPacket packet);
 
 	void handleServerToClientHandshake(ServerToClientHandshakePacket packet);
+
+	void handlePlayerGameAction(PlayerGameActionPacket packet);
+
+	void handleGameResult(GameResultPacket packet);
+
+	void handleCardTransaction(CardTransactionPacket packet);
 }
