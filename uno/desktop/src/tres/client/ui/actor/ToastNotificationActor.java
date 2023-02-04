@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 import tres.client.ui.TextureUtils;
 
@@ -42,6 +43,8 @@ public class ToastNotificationActor extends Entity {
 	public ToastNotificationActor(Vector2 position, Toast toast) {
 		super(position);
 
+		setPosition(position.x, position.y);
+
 		this.staySeconds = toast.staySeconds;
 
 		this.font = new BitmapFont();
@@ -73,16 +76,6 @@ public class ToastNotificationActor extends Entity {
 	@Override
 	protected void init() {
 		this.setMotion(new Vector2(0, -200));
-	}
-
-	@Override
-	protected void onResize() {
-
-	}
-
-	@Override
-	public void recreate() {
-
 	}
 
 	@Override
