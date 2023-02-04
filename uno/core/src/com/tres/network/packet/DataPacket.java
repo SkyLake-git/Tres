@@ -6,36 +6,38 @@ abstract public class DataPacket implements Packet, Cloneable {
 
 
 	@Override
-	public void decode(PacketDecoder in) {
-		this.decodeHeader(in);
+	public void decode(PacketDecoder in) throws PacketProcessingException {
 		try {
+			this.decodeHeader(in);
 			this.decodePayload(in);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (InvalidPayloadException e) {
+			throw new PacketProcessingException(e);
+		} catch (IOException e){
+			throw new RuntimeException(e);
 		}
-
 	}
 
-	protected void decodeHeader(PacketDecoder in) {
+	protected void decodeHeader(PacketDecoder in) throws IncorrectProtocolIdException {
 		try {
-			short header = in.getStream().readShort();
-			int pid = header;
+			int pid = in.getStream().readShort();
 			if (pid != this.getProtocolId().id) {
-				throw new RuntimeException();
+				throw new IncorrectProtocolIdException();
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	abstract protected void decodePayload(PacketDecoder in) throws Exception;
+	abstract protected void decodePayload(PacketDecoder in) throws InvalidPayloadException, IOException;
 
 	@Override
-	public void encode(PacketEncoder out) {
+	public void encode(PacketEncoder out) throws PacketProcessingException {
 		this.encodeHeader(out);
 		try {
 			this.encodePayload(out);
-		} catch (Exception e) {
+		} catch (InvalidPayloadException e) {
+			throw new PacketProcessingException(e);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -48,12 +50,11 @@ abstract public class DataPacket implements Packet, Cloneable {
 		}
 	}
 
-	abstract protected void encodePayload(PacketEncoder out) throws Exception;
+	abstract protected void encodePayload(PacketEncoder out) throws InvalidPayloadException, IOException;
 
 	@Override
 	public DataPacket clone() throws CloneNotSupportedException {
-		DataPacket a = (DataPacket) super.clone();
 
-		return a;
+		return (DataPacket) super.clone();
 	}
 }

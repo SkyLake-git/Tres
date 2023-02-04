@@ -7,9 +7,9 @@ public interface Packet {
 
 	String getName();
 
-	void encode(PacketEncoder out);
+	void encode(PacketEncoder out) throws PacketProcessingException;
 
-	void decode(PacketDecoder in);
+	void decode(PacketDecoder in) throws PacketProcessingException;
 
 	ProtocolIds getProtocolId();
 }
