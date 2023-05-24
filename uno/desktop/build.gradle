@@ -92,6 +92,7 @@ task createResource {
 
         File file = new File(base + "/build_info.json")
         // リソースファイルとして保存
+        file.mkdirs()
         file.createNewFile()
         file.write(json)
     }
