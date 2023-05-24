@@ -12,6 +12,9 @@ public class PlayStacking {
 
 	private boolean stackWilds;
 
+	private PlayStacking() {
+	}
+
 	public static PlayStacking official() {
 		return create(false, Integer.MAX_VALUE, false, false);
 	}
@@ -30,9 +33,6 @@ public class PlayStacking {
 		s.stackWilds = stackWilds;
 
 		return s;
-	}
-
-	private PlayStacking() {
 	}
 
 	public boolean isEnabled() {

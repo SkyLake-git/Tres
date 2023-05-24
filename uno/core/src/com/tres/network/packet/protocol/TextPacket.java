@@ -1,6 +1,7 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -24,12 +25,12 @@ public class TextPacket extends DataPacket implements Serverbound, Clientbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "TextPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.TEXT_PACKET;
 	}
 }

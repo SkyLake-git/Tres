@@ -3,9 +3,12 @@ package tres.client.ui.actor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 
-public class ToggleButtonActor extends BorderlessButtonActor {
+public class ToggleButtonActor extends SimpleButtonActor {
+
 
 	protected boolean toggle;
 
@@ -13,49 +16,24 @@ public class ToggleButtonActor extends BorderlessButtonActor {
 		super(position, button);
 	}
 
-	public boolean getToggle() {
-		return toggle;
-	}
-
-	public void setToggle(boolean toggle) {
-		this.toggle = toggle;
-	}
-
 	@Override
-	public void recreateTexture(Color colorDefault, Pixmap basePixmap) {
-		Pixmap cpyPixmap = new Pixmap(basePixmap.getWidth(), basePixmap.getHeight(), basePixmap.getFormat());
-		super.recreateTexture(colorDefault, cpyPixmap);
+	protected void refreshStyle(Color upColor, Color downColor, Color overColor) {
+		int width = (int) getWidth();
+		int height = (int) getHeight();
+		super.refreshStyle(upColor, downColor, overColor);
 
-		int width = basePixmap.getWidth();
-		int height = basePixmap.getHeight();
+		Pixmap checked = new Pixmap(width + 8, height + 8, Pixmap.Format.RGBA8888);
+		checked.setColor(downColor.mul(1.5f));
+		checked.fillRectangle(0, 8, width + 4, height + 4);
+		checked.setColor(0.0f, 1.0f, 0.0f, 0.05f);
+		checked.drawRectangle(0, 8, width + 4, height);
 
-		Pixmap pixmap = new Pixmap(basePixmap.getWidth(), basePixmap.getHeight(), basePixmap.getFormat());
-
-		pixmap.drawPixmap(cpyPixmap, 0, 0);
-		cpyPixmap.dispose();
-		this.texture.dispose();
-
-
-		if (this.toggle) {
-			pixmap.setColor(0, 0.75f, 0, 1f);
-		} else {
-			pixmap.setColor(0.75f, 0, 0, 1f);
-		}
-
-		int gap = 8;
-		pixmap.fillRectangle(width - 20 - gap, gap, 20, height - gap * 2);
-
-		this.texture = new Texture(pixmap);
-
-		pixmap.dispose();
+		this.getStyle().checked = new NinePatchDrawable(new NinePatch(new Texture(checked)));
 	}
 
 	@Override
 	public void act(float delta) {
 		super.act(delta);
 
-		if (this.pressed) {
-			this.toggle = !this.toggle;
-		}
 	}
 }

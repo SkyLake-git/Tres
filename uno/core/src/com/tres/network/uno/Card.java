@@ -57,6 +57,15 @@ public class Card {
 		creatablePatterns.put(Symbol.DRAW, normalColors);
 	}
 
+	public Symbol symbol;
+
+	public Color color;
+
+	public Card(Symbol symbol, Color color) {
+		this.symbol = symbol;
+		this.color = color;
+	}
+
 	public static ArrayList<Card> getCards(CardRule rule) {
 		ArrayList<Card> allPattern = new ArrayList<>();
 
@@ -82,6 +91,18 @@ public class Card {
 		}
 
 		return allPattern;
+	}
+
+	public Symbol getSymbol() {
+		return symbol;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public boolean isValidCombination() {
+		return validPatterns.get(this.symbol).contains(this.color);
 	}
 
 	public enum Color {
@@ -146,6 +167,14 @@ public class Card {
 			this.i = i;
 		}
 
+		public static Symbol fromNumber(int number) {
+			if (number > 9) {
+				throw new RuntimeException("number must lower than 9");
+			}
+
+			return values()[number];
+		}
+
 		public boolean isWild() {
 			return this.orEquals(Symbol.WILD, Symbol.WILD_DRAW);
 		}
@@ -158,14 +187,6 @@ public class Card {
 			}
 
 			return false;
-		}
-
-		public static Symbol fromNumber(int number) {
-			if (number > 9) {
-				throw new RuntimeException("number must lower than 9");
-			}
-
-			return values()[number];
 		}
 
 		@Override
@@ -193,25 +214,5 @@ public class Card {
 		public boolean isValid() {
 			return true; // todo: always return true
 		}
-	}
-
-	public Symbol symbol;
-	public Color color;
-
-	public Card(Symbol symbol, Color color) {
-		this.symbol = symbol;
-		this.color = color;
-	}
-
-	public Symbol getSymbol() {
-		return symbol;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public boolean isValidCombination() {
-		return validPatterns.get(this.symbol).contains(this.color);
 	}
 }

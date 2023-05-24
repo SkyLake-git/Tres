@@ -1,5 +1,7 @@
 package com.tres.network.packet.compression;
 
+import com.tres.network.packet.NetworkSettings;
+
 import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -24,7 +26,7 @@ public class ZlibCompressor implements Compressor {
 
 	@Override
 	public byte[] compress(byte[] data) throws CompressException {
-		byte[] result = new byte[2048];
+		byte[] result = new byte[NetworkSettings.BUFFER_SIZE];
 		Deflater zip = new Deflater();
 		zip.setInput(data);
 		zip.finish();
@@ -35,7 +37,7 @@ public class ZlibCompressor implements Compressor {
 
 	@Override
 	public byte[] decompress(byte[] data) throws CompressException {
-		byte[] result = new byte[2048];
+		byte[] result = new byte[NetworkSettings.BUFFER_SIZE];
 
 		Inflater zip = new Inflater();
 		zip.setInput(data);

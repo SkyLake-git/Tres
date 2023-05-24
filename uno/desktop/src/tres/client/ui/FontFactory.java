@@ -12,6 +12,10 @@ public class FontFactory {
 
 	protected FreeTypeFontGenerator generator;
 
+	public FontFactory() {
+		this.generator = new FreeTypeFontGenerator(Gdx.files.internal("ipaexg.ttf")); // todo: setting
+	}
+
 	public static FontFactory getInstance() {
 
 		if (instance == null) {
@@ -21,11 +25,8 @@ public class FontFactory {
 		return instance;
 	}
 
-	public FontFactory() {
-		this.generator = new FreeTypeFontGenerator(Gdx.files.internal("ipaexg.ttf")); // todo: setting
-	}
-
 	public BitmapFont generate(FreeTypeFontGenerator.FreeTypeFontParameter param) {
+		param.incremental = true;
 		return this.generator.generateFont(param);
 	}
 

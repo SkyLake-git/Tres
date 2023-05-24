@@ -1,7 +1,7 @@
 package com.tres.network.packet.protocol.types;
 
 import com.tres.network.packet.PacketDecoder;
-import com.tres.network.packet.protocol.types.action.PlayCardPlayerGameAction;
+import com.tres.network.packet.protocol.types.action.*;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -13,6 +13,10 @@ public class PlayerGameActionFactory {
 
 	static {
 		register(new PlayCardPlayerGameAction());
+		register(new DrawCardPlayerGameAction());
+		register(new ShoutUnoPlayerGameAction());
+		register(new SkipTurnPlayerGameAction());
+		register(new AccusateUnoPlayerGameAction());
 	}
 
 	public static <T extends PlayerGameAction> void register(T action) {

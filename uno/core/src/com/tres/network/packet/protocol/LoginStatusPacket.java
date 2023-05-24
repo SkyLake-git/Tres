@@ -1,13 +1,16 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 public class LoginStatusPacket extends DataPacket implements Clientbound {
 
 	public static final int REQUEST_PROTOCOL = 0;
+
 	public static final int REQUEST_CLIENT_INFO = 1;
+
 	public static final int FINISH = 16;
 
 	public int status;
@@ -23,12 +26,12 @@ public class LoginStatusPacket extends DataPacket implements Clientbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "LoginStatusPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.LOGIN_STATUS_PACKET;
 	}
 }

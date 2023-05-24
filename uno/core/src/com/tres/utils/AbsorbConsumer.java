@@ -1,7 +1,5 @@
 package com.tres.utils;
 
-import java.util.function.Consumer;
-
 @FunctionalInterface
 public interface AbsorbConsumer<T> {
 

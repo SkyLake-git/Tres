@@ -2,13 +2,15 @@ package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
 import com.tres.network.packet.protocol.types.AvailableGameInfo;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class AvailableGamesPacket extends DataPacket implements Clientbound {
 
-	public ArrayList<AvailableGameInfo> games = new ArrayList<>();
+	public Collection<AvailableGameInfo> games = new ArrayList<>();
 
 
 	public long timestamp;
@@ -29,12 +31,12 @@ public class AvailableGamesPacket extends DataPacket implements Clientbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "AvailableGamesPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.AVAILABLE_GAMES_PACKET;
 	}
 }

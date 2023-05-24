@@ -1,10 +1,15 @@
 package tres;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tres.utils.Colors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tres.client.Client;
-import com.tres.utils.Colors;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -12,6 +17,7 @@ public class DesktopLauncher {
 	public static Client client;
 
 	public static ApplicationThread applicationThread;
+
 	protected static Logger logger;
 
 	public static void main(String[] arg) {
@@ -29,6 +35,18 @@ public class DesktopLauncher {
 
 		applicationThread.start();
 		logger.info("Started");
+
+		try {
+			InputStream stream = ClassLoader.getSystemResourceAsStream("build_info.json");
+
+			ObjectMapper mapper = new ObjectMapper();
+
+			JsonNode json = mapper.readTree(stream);
+
+			logger.info("Built at: " + json.get("built_at").textValue());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
 		// initDiscord();
 

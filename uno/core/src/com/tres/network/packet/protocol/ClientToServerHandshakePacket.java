@@ -1,6 +1,7 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
@@ -34,12 +35,12 @@ public class ClientToServerHandshakePacket extends DataPacket implements Serverb
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "ClientToServerHandshakePacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.CLIENT_TO_SERVER_HANDSHAKE_PACKET;
 	}
 }

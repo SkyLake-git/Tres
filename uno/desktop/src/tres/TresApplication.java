@@ -26,9 +26,13 @@ import tres.sequence.SettingsScreen;
 public class TresApplication extends Game {
 
 	protected boolean isDisposed;
+
 	protected Viewport viewport;
+
 	protected SpriteBatch batch;
+
 	protected BitmapFont font;
+
 	protected ShapeRenderer shapeRenderer;
 
 	protected Viewport debugViewport;
@@ -38,6 +42,8 @@ public class TresApplication extends Game {
 	protected Sleeper renderSleeper;
 
 	protected ChatViewerActor packetLog;
+
+	protected SoundManager sounds;
 
 	protected Client client;
 
@@ -54,6 +60,7 @@ public class TresApplication extends Game {
 		this.viewport = new FitViewport(WorldUtils.WIDTH, WorldUtils.HEIGHT);
 		this.debugViewport = new ScreenViewport();
 		this.setScreen(new TresMainScreen(this, viewport));
+		this.sounds = new SoundManager();
 
 		this.batch = new SpriteBatch();
 		this.font = new BitmapFont();
@@ -61,7 +68,7 @@ public class TresApplication extends Game {
 		this.renderSleeper = new Sleeper();
 
 		CardTextures.init();
-		
+
 		this.packetLog = new ChatViewerActor(
 				new Vector2(5, this.debugViewport.getScreenHeight() + 50),
 				new ChatViewerActor.ChatView(
@@ -94,6 +101,10 @@ public class TresApplication extends Game {
 				));
 			}
 		});
+	}
+
+	public SoundManager getSounds() {
+		return sounds;
 	}
 
 	public Client getClient() {

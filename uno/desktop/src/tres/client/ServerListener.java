@@ -1,5 +1,6 @@
 package tres.client;
 
+import com.tres.network.packet.NetworkSettings;
 import com.tres.utils.Colors;
 
 import java.io.IOException;
@@ -29,12 +30,10 @@ public class ServerListener extends Thread {
 			}
 
 			try {
-				byte[] buffer = new byte[1024];
+				byte[] buffer = new byte[NetworkSettings.BUFFER_SIZE];
 				int size = this.stream.read(buffer);
 				if (size != -1) {
 					buffer = Arrays.copyOf(buffer, size);
-					// System.out.println(new String(this.buf, StandardCharsets.UTF_8));
-
 					this.client.onReceiveRaw(buffer);
 				} else {
 					if (!this.client.isClosed()) {

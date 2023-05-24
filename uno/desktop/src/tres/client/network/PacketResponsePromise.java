@@ -1,13 +1,14 @@
 package tres.client.network;
 
-import tres.client.ClientSession;
-import tres.client.event.packet.DataPacketReceiveEvent;
 import com.tres.network.packet.DataPacket;
 import com.tres.promise.Promise;
+import tres.client.ClientSession;
+import tres.client.event.packet.DataPacketReceiveEvent;
 
 public class PacketResponsePromise<REQ extends DataPacket, RES extends DataPacket> {
 
 	protected ClientSession session;
+
 	protected RES result;
 
 	protected Class<RES> responseClass;

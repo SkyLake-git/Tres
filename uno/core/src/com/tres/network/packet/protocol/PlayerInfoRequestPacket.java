@@ -1,6 +1,7 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -22,12 +23,12 @@ public class PlayerInfoRequestPacket extends DataPacket implements Serverbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "PlayerInfoRequestPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.PLAYER_INFO_REQUEST_PACKET;
 	}
 }

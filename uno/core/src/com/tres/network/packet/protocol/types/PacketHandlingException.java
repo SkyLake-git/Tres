@@ -1,6 +1,6 @@
 package com.tres.network.packet.protocol.types;
 
-public class PacketHandlingException extends RuntimeException{
+public class PacketHandlingException extends RuntimeException {
 
 	public PacketHandlingException() {
 	}

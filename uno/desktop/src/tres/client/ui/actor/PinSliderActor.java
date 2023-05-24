@@ -12,11 +12,53 @@ import java.util.ArrayList;
 
 public class PinSliderActor extends SliderActor {
 
+	private final PinInterpolation interpolation;
+
+	public PinSliderActor(Vector2 position, float width, float height, float min, float max, float stepSize, boolean vertical, BitmapFont font, String format) {
+		super(position, width, height, min, max, stepSize, vertical, font, format);
+
+		this.interpolation = new PinInterpolation(this.getMaxValue(), this.getMinValue());
+		this.setVisualInterpolationInverse(this.interpolation);
+	}
+
+	public void addPin(SliderPin pin) {
+		this.interpolation.pins.add(pin);
+	}
+
+	@Override
+	public void setRange(float min, float max) {
+		super.setRange(min, max);
+
+		this.interpolation.maxValue = this.getMaxValue();
+		this.interpolation.minValue = this.getMinValue();
+	}
+
+	@Override
+	public void draw(Batch batch, float parentAlpha) {
+		super.draw(batch, parentAlpha);
+
+		for (SliderPin pin : this.interpolation.pins) {
+			float percentage = (pin.value - this.getMinValue()) / (this.getMaxValue() - this.getMinValue());
+
+			float x = getX() + this.getWidth() * percentage;
+			x -= pin.width / 2f;
+
+			float y = getY() + this.getHeight() + 6;
+
+			if (!pin.hasTexture) {
+				continue;
+			}
+
+			batch.draw(pin.getTexture(), x, y);
+		}
+	}
+
 	public static class PinInterpolation extends Interpolation {
 
 		public ArrayList<SliderPin> pins;
 
 		public float maxValue;
+
 		public float minValue;
 
 		public PinInterpolation(float maxValue, float minValue) {
@@ -53,14 +95,16 @@ public class PinSliderActor extends SliderActor {
 	public static class SliderPin {
 
 		public float value;
+
 		public float valueArea;
 
+		public boolean hasTexture;
+
 		protected int height;
+
 		protected int width;
 
 		protected Color color;
-
-		public boolean hasTexture;
 
 		protected Texture texture;
 
@@ -137,47 +181,6 @@ public class PinSliderActor extends SliderActor {
 
 		public Texture getTexture() {
 			return texture;
-		}
-	}
-
-	private final PinInterpolation interpolation;
-
-	public PinSliderActor(Vector2 position, float width, float height, float min, float max, float stepSize, boolean vertical, BitmapFont font, String format) {
-		super(position, width, height, min, max, stepSize, vertical, font, format);
-
-		this.interpolation = new PinInterpolation(this.getMaxValue(), this.getMinValue());
-		this.setVisualInterpolationInverse(this.interpolation);
-	}
-
-	public void addPin(SliderPin pin) {
-		this.interpolation.pins.add(pin);
-	}
-
-	@Override
-	public void setRange(float min, float max) {
-		super.setRange(min, max);
-
-		this.interpolation.maxValue = this.getMaxValue();
-		this.interpolation.minValue = this.getMinValue();
-	}
-
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
-
-		for (SliderPin pin : this.interpolation.pins) {
-			float percentage = (pin.value - this.getMinValue()) / (this.getMaxValue() - this.getMinValue());
-
-			float x = getX() + this.getWidth() * percentage;
-			x -= pin.width / 2f;
-
-			float y = getY() + this.getHeight() + 6;
-
-			if (!pin.hasTexture) {
-				continue;
-			}
-
-			batch.draw(pin.getTexture(), x, y);
 		}
 	}
 }

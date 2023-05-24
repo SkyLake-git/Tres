@@ -16,6 +16,11 @@ public class AvailableGameInfo {
 		this.gameId = gameId;
 	}
 
+	public static AvailableGameInfo read(PacketDecoder in) throws IOException {
+
+		return new AvailableGameInfo(in.readInt(), in.readInt());
+	}
+
 	public int getPlayers() {
 		return players;
 	}
@@ -27,10 +32,5 @@ public class AvailableGameInfo {
 	public void write(PacketEncoder out) throws IOException {
 		out.writeInt(this.players);
 		out.writeInt(this.gameId);
-	}
-
-	public static AvailableGameInfo read(PacketDecoder in) throws IOException {
-
-		return new AvailableGameInfo(in.readInt(), in.readInt());
 	}
 }

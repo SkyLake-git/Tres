@@ -82,12 +82,12 @@ public enum Colors {
 		this.code = (char) 27 + code;
 	}
 
+	public static String wrap(String target, Colors color) {
+		return color.toString() + target + Colors.RESET;
+	}
+
 	@Override
 	public String toString() {
 		return code;
-	}
-
-	public static String wrap(String target, Colors color) {
-		return color.toString() + target + Colors.RESET;
 	}
 }

@@ -8,18 +8,11 @@ import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.compression.ZlibCompressor;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.NetworkChannel;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Base64;
 
 public class PacketSender {
 	protected final ArrayList<Packet> flush;
+
 	protected IOWrapper wrapper;
 
 	protected boolean isClosed;
@@ -71,8 +64,8 @@ public class PacketSender {
 	}
 
 	public void sendFlush() throws CompressException, CryptoException, PacketProcessingException {
-		synchronized (this.flush){
-			if (this.flush.size() == 0){
+		synchronized (this.flush) {
+			if (this.flush.size() == 0) {
 				return;
 			}
 
@@ -95,7 +88,7 @@ public class PacketSender {
 	}
 
 	public void sendPacket(Packet packet) {
-		synchronized (this.flush){
+		synchronized (this.flush) {
 			this.flush.add(packet);
 		}
 	}
@@ -114,7 +107,6 @@ public class PacketSender {
 	}
 
 	protected void output(PacketBatch batch) throws CompressException, CryptoException {
-
 		byte[] buffer = batch.getBuffer();
 
 		if (this.settings.compression()) {

@@ -1,6 +1,6 @@
 package com.tres.network.packet;
 
-public class PacketProcessingException extends Exception{
+public class PacketProcessingException extends Exception {
 
 	public PacketProcessingException() {
 	}

@@ -1,12 +1,14 @@
 package com.tres.network.packet;
 
 import com.tres.utils.AbsorbFunction;
+import com.tres.utils.AbsorbRunnable;
 import com.tres.utils.AbsorbSupplier;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PacketDecoder {
 
@@ -65,6 +67,15 @@ public class PacketDecoder {
 		return bytes;
 	}
 
+	public byte[] readN() throws IOException {
+		int n = this.stream.readInt();
+		byte[] bytes = new byte[n];
+		int size = this.stream.read(bytes);
+
+
+		return Arrays.copyOf(bytes, size);
+	}
+
 	public <T> T readIf(AbsorbSupplier<T> supplier, T defaultValue) throws IOException {
 		if (this.readBoolean()) {
 			try {
@@ -77,6 +88,18 @@ public class PacketDecoder {
 		}
 
 		return defaultValue;
+	}
+
+	public void runIf(AbsorbRunnable runnable) throws IOException {
+		if (this.readBoolean()) {
+			try {
+				runnable.run();
+			} catch (IOException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	public short readNaturalShort() throws IOException {

@@ -12,7 +12,7 @@ abstract public class DataPacket implements Packet, Cloneable {
 			this.decodePayload(in);
 		} catch (InvalidPayloadException e) {
 			throw new PacketProcessingException(e);
-		} catch (IOException e){
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

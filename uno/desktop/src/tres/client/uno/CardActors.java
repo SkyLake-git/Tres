@@ -4,15 +4,16 @@ import com.tres.network.uno.Card;
 import tres.client.ui.actor.CardActor;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class CardActors {
 
-	protected HashMap<Integer, CardActor> actors;
+	protected LinkedHashMap<Integer, CardActor> actors;
 
 	protected HashMap<Card, Integer> id;
 
 	public CardActors() {
-		this.actors = new HashMap<>();
+		this.actors = new LinkedHashMap<>();
 		this.id = new HashMap<>();
 	}
 

@@ -13,8 +13,9 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import tres.ScreenSequence;
 import tres.TresApplication;
 import tres.client.ui.WorldUtils;
-import tres.client.ui.actor.BorderlessButtonActor;
 import tres.client.ui.actor.PinSliderActor;
+import tres.client.ui.actor.SimpleButtonActor;
+import tres.client.ui.actor.SliderActor;
 import tres.client.ui.actor.ToggleButtonActor;
 import tres.client.ui.layout.NarrowLayout;
 import tres.client.ui.layout.attachment.LimitedViewAttachment;
@@ -27,20 +28,24 @@ public class SettingsScreen extends ScreenSequence {
 
 	protected PinSliderActor slider;
 
+	protected SliderActor sensSlider;
+
 	protected Screen returnTo;
 
-	protected BorderlessButtonActor applyButton;
+	protected SimpleButtonActor applyButton;
 
-	protected BorderlessButtonActor returnButton;
+	protected SimpleButtonActor returnButton;
 
 	protected ToggleButtonActor vsyncButton;
+
+	protected ToggleButtonActor anonymousButton;
 
 	protected NarrowLayout list;
 
 	protected LimitedViewAttachment viewAttachment;
 
 	public SettingsScreen(TresApplication game, Viewport viewport, Screen returnTo) {
-		super(game, viewport);
+		super(game);
 		this.returnTo = returnTo;
 	}
 
@@ -72,21 +77,47 @@ public class SettingsScreen extends ScreenSequence {
 				"FPS: %.0f"
 		);
 
+		this.sensSlider = new PinSliderActor(
+				new Vector2(0, 0),
+				400,
+				60,
+				0.0f,
+				3,
+				0.02f,
+				false,
+				new BitmapFont(),
+				"Sensitivity: %.2f"
+		);
+
 		this.vsyncButton = new ToggleButtonActor(
 				new Vector2(0, 0),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Use VSync",
 						180,
 						60,
-						new Color(0f, 0f, 0f, 1f),
+						null,
+						0f
+				)
+		);
+		this.anonymousButton = new ToggleButtonActor(
+				new Vector2(0, 0),
+				new SimpleButtonActor.Button(
+						"Allow client info to be sent",
+						180,
+						60,
+						null,
 						0f
 				)
 		);
 
 
 		this.slider.setValue(this.game.getSettings().getForegroundFPS());
+		this.sensSlider.setValue(this.game.getSettings().getSensitivity());
+		this.vsyncButton.setChecked(this.game.getSettings().isUsingVsync());
+		this.anonymousButton.setChecked(!this.game.getSettings().isAnonymous());
 
 		ArrayList<Integer> list = new ArrayList<>();
+		list.add(240);
 		list.add(144);
 		list.add(60);
 		list.add(30);
@@ -106,36 +137,47 @@ public class SettingsScreen extends ScreenSequence {
 			this.slider.addPin(new PinSliderActor.SliderPin(this.game.getSettings().getMonitorRefreshRate(), 5, new Color(1f, 0f, 0f, 1f)));
 		}
 
-		this.applyButton = new BorderlessButtonActor(
+		this.applyButton = new SimpleButtonActor(
 				WorldUtils.percentage(0.1f, -0.5f).add(0, 40),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Apply",
 						300,
 						60,
-						new Color(0, 0, 0, 1f),
+						null,
 						0.25f
 				)
 		);
 
-		this.returnButton = new BorderlessButtonActor(
+		this.returnButton = new SimpleButtonActor(
 				WorldUtils.percentage(-0.1f, -0.5f).add(0, 40),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Return",
 						300,
 						60,
-						new Color(0, 0, 0, 1f),
+						null,
 						0f
 				)
 		);
-
-		this.getViewport().setCamera(this.camera);
 
 		this.stage.addActor(this.slider);
 		this.stage.addActor(this.applyButton);
 		this.stage.addActor(this.returnButton);
 		this.stage.addActor(this.vsyncButton);
+		this.stage.addActor(this.sensSlider);
+		this.stage.addActor(this.anonymousButton);
 		this.list.add(this.slider);
+		this.list.add(this.sensSlider);
 		this.list.add(this.vsyncButton);
+		this.list.add(this.anonymousButton);
+		if (this.game.getClient().getSession() != null) {
+			this.anonymousButton.setDisabled(true);
+		}
+	}
+
+	@Override
+	public void focus() {
+		super.focus();
+		this.getViewport().setCamera(this.camera);
 	}
 
 	@Override
@@ -154,7 +196,11 @@ public class SettingsScreen extends ScreenSequence {
 
 		if (this.applyButton.isPressed()) {
 			this.game.getSettings().setForegroundFPS((int) this.slider.getValue());
-			this.game.getSettings().useVsync(this.vsyncButton.getToggle());
+			this.game.getSettings().useVsync(this.vsyncButton.isChecked());
+			this.game.getSettings().setSensitivity(this.sensSlider.getValue());
+			this.game.getSettings().setAnonymous(!this.anonymousButton.isChecked());
+
+			this.game.getClient().setAnonymousMode(this.game.getSettings().isAnonymous());
 		}
 
 		if (this.returnButton.isPressed()) {

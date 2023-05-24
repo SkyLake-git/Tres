@@ -42,14 +42,14 @@ public class CardRule {
 		}
 
 		return (this.playStacking.onlySymbolMatch() && origin.symbol.equals(baseCard.symbol)) ||
-			   origin.color.equals(baseCard.color) &&
-			   (
-					   this.playStacking.stackDraws() ||
-					   !(baseCard.symbol.orEquals(Card.Symbol.DRAW, Card.Symbol.WILD_DRAW) && origin.symbol.orEquals(Card.Symbol.DRAW, Card.Symbol.WILD_DRAW))
-			   ) &&
-			   (
-					   this.playStacking.stackWilds() ||
-					   !(baseCard.symbol.isWild() && origin.symbol.isWild())
-			   );
+		       origin.color.equals(baseCard.color) &&
+		       (
+				       this.playStacking.stackDraws() ||
+				       !(baseCard.symbol.orEquals(Card.Symbol.DRAW, Card.Symbol.WILD_DRAW) && origin.symbol.orEquals(Card.Symbol.DRAW, Card.Symbol.WILD_DRAW))
+		       ) &&
+		       (
+				       this.playStacking.stackWilds() ||
+				       !(baseCard.symbol.isWild() && origin.symbol.isWild())
+		       );
 	}
 }

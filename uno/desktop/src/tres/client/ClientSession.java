@@ -1,30 +1,37 @@
 package tres.client;
 
 
-import com.badlogic.gdx.utils.Null;
 import com.tres.network.SocketIOWrapper;
 import com.tres.network.packet.*;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.cipher.NetworkCipher;
 import com.tres.network.packet.compression.CompressException;
 import com.tres.network.packet.protocol.DisconnectPacket;
+import com.tres.network.packet.protocol.FileStreamResultPacket;
+import com.tres.network.packet.protocol.types.FileStreamInfo;
 import com.tres.network.packet.protocol.types.PacketHandlingException;
-import com.tres.network.uno.Player;
 import com.tres.utils.Colors;
+import com.tres.utils.DigestUtils;
 import com.tres.utils.ParameterMethodCaller;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tres.client.event.packet.DataPacketReceiveEvent;
 import tres.client.event.packet.DataPacketSendEvent;
+import tres.client.network.FileChunkReceiver;
+import tres.client.network.NetworkFile;
+import tres.client.network.NetworkFileManager;
 import tres.client.network.handler.InGamePacketHandler;
 import tres.client.network.handler.PacketHandler;
 import tres.client.uno.ClientPlayer;
+import tres.client.uno.ViewPlayer;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 
 public class ClientSession {
 
@@ -46,10 +53,16 @@ public class ClientSession {
 
 	protected ClientNetworkActions actions;
 
-	@Null
-	protected NetworkCipher cipher;
+	protected NetworkFileManager fileManager;
+
+	protected @Nullable NetworkCipher cipher;
 
 	protected SocketIOWrapper ioWrapper;
+
+	protected @Nullable FileChunkReceiver fileChunkReceiver;
+
+	protected HashMap<Short, ViewPlayer> viewPlayers;
+
 
 	ClientSession(Client client) {
 		this.client = client;
@@ -62,8 +75,54 @@ public class ClientSession {
 		this.logger = LoggerFactory.getLogger(this.getClass());
 		this.player = null;
 		this.cipherKey = null;
+		this.fileChunkReceiver = null;
+		this.fileManager = new NetworkFileManager();
+		this.viewPlayers = new HashMap<>();
 
 		this.actions = new ClientNetworkActions(this);
+	}
+
+	public HashMap<Short, ViewPlayer> getViewPlayers() {
+		return viewPlayers;
+	}
+
+	public NetworkFileManager getFileManager() {
+		return fileManager;
+	}
+
+	public @Nullable FileChunkReceiver getFileChunkReceiver() {
+		return fileChunkReceiver;
+	}
+
+	public void createFileChunkReceiver(FileStreamInfo info, boolean background) {
+		this.fileChunkReceiver = new FileChunkReceiver(info, background);
+		this.fileChunkReceiver.getPromise().onSuccess(() -> {
+			this.logger.info("Receiving file chunk completed. Building content...");
+			FileChunkReceiver.Builder.build(this.fileChunkReceiver, this.client).thenAccept((built) -> {
+				String digest = DigestUtils.sha256(built);
+
+				this.logger.info(String.format("Digests: (server: %s, client: %s)", digest, fileChunkReceiver.getInfo().digest));
+
+
+				boolean digestMismatch = !this.fileChunkReceiver.getInfo().digest.equals(digest);
+
+				FileStreamResultPacket packet = new FileStreamResultPacket();
+				packet.digestMismatch = digestMismatch;
+				this.sendDataPacket(packet);
+
+				if (digestMismatch) {
+					this.logger.warn("Building file failed. (File digest does not match)");
+					this.logger.warn("Please contact server owner");
+					this.fileChunkReceiver = null;
+					return;
+				}
+
+				this.logger.info(String.format("File completely built. (size: %db, time: %s)", built.length, Math.round((float) this.fileChunkReceiver.getTimeElapsed() / 1000) + "s"));
+
+				this.fileManager.add(new NetworkFile(this.fileChunkReceiver.getInfo(), built));
+				this.fileChunkReceiver = null;
+			});
+		});
 	}
 
 	public ClientNetworkActions getActions() {
@@ -114,13 +173,14 @@ public class ClientSession {
 		}
 	}
 
-	public void createPlayer(PlayerInfo info) {
+	public void createPlayer(short runtimeId, PlayerInfo info) {
 		if (this.player == null) {
-			this.player = new ClientPlayer(Player.nextRuntimeId(), info);
+			this.player = new ClientPlayer(this, runtimeId, info);
+			this.viewPlayers.put(runtimeId, this.player);
 		}
 	}
 
-	public ClientPlayer getPlayer() {
+	public @Nullable ClientPlayer getPlayer() {
 		return player;
 	}
 
@@ -144,14 +204,14 @@ public class ClientSession {
 		return packetHandler;
 	}
 
-	public PacketSender getPacketSender() {
-		return packetSender;
-	}
-
 	public void setPacketHandler(PacketHandler packetHandler) {
 		this.packetHandler = packetHandler;
 
 		this.packetHandlerCaller = new ParameterMethodCaller<>(this.packetHandler);
+	}
+
+	public PacketSender getPacketSender() {
+		return packetSender;
 	}
 
 	public ParameterMethodCaller<Packet> getPacketHandlerCaller() {

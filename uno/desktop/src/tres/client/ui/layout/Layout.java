@@ -10,7 +10,9 @@ import java.util.Collection;
 abstract public class Layout {
 
 	protected Vector2 position;
+
 	protected int width;
+
 	protected int height;
 
 	protected ArrayList<Actor> actors;

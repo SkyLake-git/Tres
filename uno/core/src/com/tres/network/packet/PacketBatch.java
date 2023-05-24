@@ -2,7 +2,6 @@ package com.tres.network.packet;
 
 import com.tres.network.packet.protocol.PacketPool;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,7 +15,24 @@ public class PacketBatch {
 		this.buffer = new ByteArrayOutputStream();
 	}
 
-	public void write(byte[] payload){
+	public static PacketBatch from(ArrayList<byte[]> payloads) {
+		PacketBatch batch = new PacketBatch();
+
+		for (byte[] payload : payloads) {
+			batch.write(payload);
+		}
+
+		return batch;
+	}
+
+	public static PacketBatch from(byte[] payload) {
+		PacketBatch batch = new PacketBatch();
+		batch.write(payload);
+
+		return batch;
+	}
+
+	public void write(byte[] payload) {
 		try {
 			this.buffer.write(payload);
 		} catch (IOException e) {
@@ -24,33 +40,20 @@ public class PacketBatch {
 		}
 	}
 
-	public static PacketBatch from(ArrayList<byte[]> payloads) {
-		PacketBatch batch = new PacketBatch();
-
-		for (byte[] payload : payloads){
-			batch.write(payload);
-		}
-
-		return batch;
-	}
-
-	public static PacketBatch from(byte[] payload){
-		PacketBatch batch = new PacketBatch();
-		batch.write(payload);
-
-		return batch;
-	}
-
 	public ArrayList<Packet> getPackets(PacketPool packetPool, int max) throws IOException, PacketProcessingException {
 		ArrayList<Packet> packets = new ArrayList<>();
 		int offset = 0;
 		ByteBuffer buffer = ByteBuffer.wrap(this.getBuffer());
 
-		for (int i = 0; i < max; i ++){
+		for (int i = 0; i < max; i++) {
 			byte[] buf = new byte[buffer.remaining()];
 			buffer.get(buf);
 
 			DataPacket packet = packetPool.getPacket(buf);
+
+			if (packet == null) {
+				throw new PacketProcessingException("Packet not found");
+			}
 
 			PacketDecoder decoder = new PacketDecoder(buf);
 			int beforeAvailable = decoder.getStream().available();
@@ -64,7 +67,7 @@ public class PacketBatch {
 
 			packets.add(packet);
 
-			if (buffer.remaining() == 0){
+			if (buffer.remaining() == 0) {
 				break;
 			}
 

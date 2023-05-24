@@ -17,10 +17,6 @@ public enum DeviceOS {
 		this.id = id;
 	}
 
-	public int getId() {
-		return id;
-	}
-
 	public static DeviceOS parse(String os) {
 		if (os.startsWith("Windows")) {
 			return DeviceOS.WINDOWS;
@@ -39,5 +35,9 @@ public enum DeviceOS {
 		}
 
 		return DeviceOS.UNKNOWN;
+	}
+
+	public int getId() {
+		return id;
 	}
 }

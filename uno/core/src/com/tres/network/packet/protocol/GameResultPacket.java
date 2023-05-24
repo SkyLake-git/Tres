@@ -2,6 +2,7 @@ package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
 import com.tres.network.packet.protocol.types.Rank;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 public class GameResultPacket extends DataPacket implements Clientbound {
 
 	public ArrayList<Rank> ranking;
+
 	public int gameId = -1;
 
 	@Override
@@ -24,12 +26,12 @@ public class GameResultPacket extends DataPacket implements Clientbound {
 	}
 
 	@Override
-	public String getName() {
-		return null;
+	public @NotNull String getName() {
+		return "GameResultPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.GAME_RESULT_PACKET;
 	}
 }

@@ -7,7 +7,7 @@ public class SocketIOWrapper implements IOWrapper {
 
 	protected Socket socket;
 
-	public SocketIOWrapper(Socket socket){
+	public SocketIOWrapper(Socket socket) {
 		this.socket = socket;
 	}
 

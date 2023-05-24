@@ -3,13 +3,12 @@ package tres.client;
 import com.tres.network.packet.DataPacket;
 import com.tres.network.packet.cipher.CryptoException;
 import com.tres.network.packet.cipher.NetworkCipher;
-import com.tres.network.packet.protocol.AvailableGamesPacket;
-import com.tres.network.packet.protocol.ClientToServerHandshakePacket;
-import com.tres.network.packet.protocol.PlayerActionPacket;
-import com.tres.network.packet.protocol.RequestAvailableGamesPacket;
+import com.tres.network.packet.protocol.*;
 import com.tres.network.packet.protocol.types.AvailableGameInfo;
 import com.tres.network.packet.protocol.types.PlayerAction;
 import com.tres.promise.Promise;
+import com.tres.utils.EventLinks;
+import org.jetbrains.annotations.Nullable;
 import tres.client.event.packet.DataPacketReceiveEvent;
 import tres.client.network.PacketResponsePromise;
 
@@ -17,41 +16,57 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 
 public class ClientNetworkActions {
 
+	private final EventLinks eventLinks;
+
 	protected ClientSession session;
 
-	private final String eventRegistererId;
-
 	protected ArrayList<AvailableGameInfo> availableGames;
+
 	protected int lastFetchAvailableGames;
 
 	protected PacketResponsePromise<RequestAvailableGamesPacket, AvailableGamesPacket> availableGamePromise;
 
+	protected GameLevelPacket latestGameLevel;
+
 	public ClientNetworkActions(ClientSession session) {
 		this.session = session;
-		this.eventRegistererId = this.session.getClient().getEventEmitter().on(DataPacketReceiveEvent.class, (channel, event) -> {
+		this.eventLinks = new EventLinks(this.session.getClient().getEventEmitter());
+		this.eventLinks.on(this.session.getClient().getEventEmitter().on(DataPacketReceiveEvent.class, (channel, event) -> {
 			this.onDataPacketReceive(event);
-		});
+		}));
 
 		this.availableGames = new ArrayList<>();
 		this.availableGamePromise = null;
-		this.lastFetchAvailableGames = 0;
+		this.lastFetchAvailableGames = -200;
+		this.latestGameLevel = null;
+	}
+
+	public @Nullable GameLevelPacket getLatestGameLevel() {
+		return latestGameLevel;
+	}
+
+	public void setLatestGameLevel(GameLevelPacket latestGameLevel) {
+		this.latestGameLevel = latestGameLevel;
 	}
 
 	public void close() {
-		this.session.getClient().getEventEmitter().off(this.eventRegistererId);
+		this.eventLinks.offAll();
 	}
 
 	private void onDataPacketReceive(DataPacketReceiveEvent event) {
 		DataPacket packet = event.getPacket();
 
 		if (packet instanceof AvailableGamesPacket) {
-
 			this.availableGames.clear();
 			this.availableGames.addAll(((AvailableGamesPacket) packet).games);
+		}
 
+		if (packet instanceof GameLevelPacket) {
+			this.setLatestGameLevel((GameLevelPacket) packet);
 		}
 	}
 
@@ -85,8 +100,8 @@ public class ClientNetworkActions {
 		return this.availableGamePromise.getPromise();
 	}
 
-	public Promise<ArrayList<AvailableGameInfo>> getAvailableGames() {
-		Promise<ArrayList<AvailableGameInfo>> p = new Promise<>();
+	public Promise<Collection<AvailableGameInfo>> getAvailableGames() {
+		Promise<Collection<AvailableGameInfo>> p = new Promise<>();
 
 		if (this.session.getTick() - this.lastFetchAvailableGames > 80) {
 			Promise<AvailableGamesPacket> packetPromise = this.fetchAvailableGames();
@@ -110,6 +125,15 @@ public class ClientNetworkActions {
 		packet.action = PlayerAction.JOIN_GAME;
 
 		this.session.sendDataPacket(packet);
+	}
+
+	public void requestLeaveGame() {
+		PlayerActionPacket packet = new PlayerActionPacket();
+		packet.action = PlayerAction.LEAVE_GAME;
+
+		this.session.sendDataPacket(packet);
+
+		this.session.getPlayer().onLeftGame(); // todo: packet response
 	}
 
 

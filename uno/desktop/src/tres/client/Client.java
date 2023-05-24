@@ -25,8 +25,6 @@ import java.util.Base64;
 
 public class Client implements Heartbeat.Syncable {
 
-	protected Socket socket;
-
 	protected Heartbeat heartbeat;
 
 	protected EventEmitter eventEmitter;
@@ -40,6 +38,7 @@ public class Client implements Heartbeat.Syncable {
 	protected int tick;
 
 	protected boolean isClosed;
+
 	protected boolean isRunning;
 
 	protected ClientSession session;
@@ -47,6 +46,12 @@ public class Client implements Heartbeat.Syncable {
 	protected Sleeper tickSleeper;
 
 	protected String loginJWT;
+
+	protected ClientThreadPool threadPool;
+
+	protected boolean anonymousMode;
+
+	private Socket socket;
 
 	public Client() {
 		this.socket = null;
@@ -57,6 +62,7 @@ public class Client implements Heartbeat.Syncable {
 		this.logger = LoggerFactory.getLogger(this.getClass());
 
 		this.packetPool = new PacketPool();
+		this.threadPool = new ClientThreadPool(4);
 
 		this.listener = null;
 
@@ -67,18 +73,33 @@ public class Client implements Heartbeat.Syncable {
 
 		this.session = null;
 
+		this.anonymousMode = false;
+
 		this.eventEmitter = new EventEmitter();
 
 		this.tickSleeper = new Sleeper();
 
+
 		this.prepareLoginJWT();
+	}
+
+	public ClientThreadPool getThreadPool() {
+		return threadPool;
+	}
+
+	public boolean isAnonymousMode() {
+		return anonymousMode;
+	}
+
+	public void setAnonymousMode(boolean anonymousMode) {
+		this.anonymousMode = anonymousMode;
 	}
 
 	public String getLoginJWT() {
 		return loginJWT;
 	}
 
-	public void prepareLoginJWT(){
+	public void prepareLoginJWT() {
 		this.loginJWT = JWT.create()
 				.withIssuer(JwtUtils.issuer)
 				.withAudience("server")
@@ -93,6 +114,8 @@ public class Client implements Heartbeat.Syncable {
 	public void start(InetSocketAddress address) throws IOException {
 		if (!this.heartbeat.isAlive()) {
 			this.socket = new Socket();
+			this.socket.setReceiveBufferSize(NetworkSettings.BUFFER_SIZE);
+			this.socket.setSendBufferSize(NetworkSettings.BUFFER_SIZE);
 			this.socket.connect(address);
 
 			try {
@@ -176,7 +199,7 @@ public class Client implements Heartbeat.Syncable {
 		byte[] result = data;
 		//todo: split
 
-		if (this.getSession().getCipher() != null){
+		if (this.getSession().getCipher() != null) {
 			try {
 				result = this.getSession().getCipher().decrypt(result);
 			} catch (CryptoException e) {
@@ -199,8 +222,9 @@ public class Client implements Heartbeat.Syncable {
 		ArrayList<Packet> packets;
 		try {
 			packets = batch.getPackets(this.packetPool, 20);
-		} catch (IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
+			this.session.disconnect("Packet Decoding Error (may be protocol break)");
 			return;
 		} catch (PacketProcessingException e) {
 			e.printStackTrace();
@@ -209,7 +233,7 @@ public class Client implements Heartbeat.Syncable {
 		}
 
 		for (Packet packet : packets) {
-			if (!(packet instanceof DataPacket)){
+			if (!(packet instanceof DataPacket)) {
 				this.logger.warn("Unexpected: not instanceof DataPacket");
 				continue;
 			}
@@ -223,7 +247,7 @@ public class Client implements Heartbeat.Syncable {
 			this.logger.info("Invalid packet received: " + packet.getName());
 		}
 
-		if (this.session.isConnected()){
+		if (this.session.isConnected()) {
 			this.session.handlePacket(packet);
 		}
 	}

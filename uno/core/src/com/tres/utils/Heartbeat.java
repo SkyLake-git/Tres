@@ -4,21 +4,17 @@ import java.util.ArrayList;
 
 public class Heartbeat extends Thread {
 
-	public interface Syncable {
-		void tick();
-	}
-
 	protected double tps;
 
 	protected double realTps;
-	protected double delay;
-	protected ArrayList<Syncable> list;
 
+	protected double delay;
+
+	protected ArrayList<Syncable> list;
 
 	protected double load;
 
 	protected long nextRun;
-
 
 	public Heartbeat(double tps) {
 		this.tps = tps;
@@ -77,5 +73,9 @@ public class Heartbeat extends Thread {
 				this.nextRun = start + delayMillis;
 			}
 		}
+	}
+
+	public interface Syncable {
+		void tick();
 	}
 }

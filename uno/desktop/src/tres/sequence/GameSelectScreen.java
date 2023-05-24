@@ -7,18 +7,20 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.tres.network.packet.protocol.types.AvailableGameInfo;
+import com.tres.promise.Promise;
+import com.tres.snooze.SleeperNotifier;
 import tres.DesktopLauncher;
 import tres.ScreenSequence;
 import tres.TresApplication;
 import tres.client.ui.WorldUtils;
-import tres.client.ui.actor.BorderlessButtonActor;
+import tres.client.ui.actor.SimpleButtonActor;
 import tres.client.ui.layout.NarrowLayout;
 import tres.client.ui.layout.attachment.LimitedViewAttachment;
-import com.tres.network.packet.protocol.types.AvailableGameInfo;
-import com.tres.promise.Promise;
-import com.tres.snooze.SleeperNotifier;
+import tres.sequence.ingame.InGamePlayScreen;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class GameSelectScreen extends ScreenSequence {
 	protected OrthographicCamera camera;
@@ -27,15 +29,12 @@ public class GameSelectScreen extends ScreenSequence {
 
 	protected LimitedViewAttachment listAttachment;
 
-	protected ArrayList<BorderlessButtonActor> list;
+	protected HashMap<AvailableGameInfo, SimpleButtonActor> list;
 
-	protected BorderlessButtonActor refreshButton;
-
-	protected ArrayList<AvailableGameInfo> addQueue;
-
+	protected SimpleButtonActor refreshButton;
 
 	public GameSelectScreen(TresApplication game, Viewport viewport) {
-		super(game, viewport);
+		super(game);
 
 	}
 
@@ -54,30 +53,28 @@ public class GameSelectScreen extends ScreenSequence {
 				true
 		);
 
-		this.refreshButton = new BorderlessButtonActor(
+		this.refreshButton = new SimpleButtonActor(
 				new Vector2(310, 50),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Refresh",
 						80,
 						50,
-						new Color(0f, 0f, 0f, 1f),
+						null,
 						0f
 				)
 		);
 
-		this.list = new ArrayList<>();
+		this.list = new HashMap<>();
 
 		this.stage.addActor(this.refreshButton);
 
 		this.getViewport().setCamera(this.camera);
-
-		this.addQueue = new ArrayList<>();
 	}
 
 	public void addGame(AvailableGameInfo gameInfo) {
-		BorderlessButtonActor button = new BorderlessButtonActor(
+		SimpleButtonActor button = new SimpleButtonActor(
 				new Vector2(0, 0),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Game: " + gameInfo.getGameId() + "\nPlayer: " + gameInfo.getPlayers(),
 						400,
 						120,
@@ -87,12 +84,12 @@ public class GameSelectScreen extends ScreenSequence {
 		);
 
 		this.stage.addActor(button);
-		this.list.add(button);
+		this.list.put(gameInfo, button);
 		this.listLayout.add(button);
 	}
 
 	public void clearList() {
-		for (Actor actor : this.list) {
+		for (Actor actor : this.list.values()) {
 			actor.remove();
 		}
 
@@ -100,10 +97,10 @@ public class GameSelectScreen extends ScreenSequence {
 		this.listLayout.getActors().clear();
 	}
 
-	synchronized private void refresh(Promise<ArrayList<AvailableGameInfo>> promise) {
+	synchronized private void refresh(Promise<Collection<AvailableGameInfo>> promise) {
 		this.clearList();
 
-		ArrayList<AvailableGameInfo> result = promise.getResult();
+		Collection<AvailableGameInfo> result = promise.getResult();
 
 		for (AvailableGameInfo gameInfo : result) {
 			this.addGame(gameInfo);
@@ -120,7 +117,7 @@ public class GameSelectScreen extends ScreenSequence {
 
 
 		if (this.refreshButton.isPressed()) {
-			Promise<ArrayList<AvailableGameInfo>> promise = DesktopLauncher.client.getSession().getActions().getAvailableGames();
+			Promise<Collection<AvailableGameInfo>> promise = DesktopLauncher.client.getSession().getActions().getAvailableGames();
 			promise.onSuccess(() -> {
 
 				SleeperNotifier notifier = new SleeperNotifier();
@@ -132,6 +129,14 @@ public class GameSelectScreen extends ScreenSequence {
 
 				notifier.wakeup();
 			});
+		}
+
+		for (AvailableGameInfo info : this.list.keySet()) {
+			SimpleButtonActor button = this.list.get(info);
+			if (button.isPressed()) {
+				this.game.setScreen(new InGamePlayScreen(this.game, this.getViewport(), info.getGameId()));
+				break;
+			}
 		}
 	}
 }

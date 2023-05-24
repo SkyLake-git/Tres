@@ -1,6 +1,7 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -19,12 +20,12 @@ public class PlayerActionResponsePacket extends DataPacket implements Clientboun
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "PlayerActionResponsePacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.PLAYER_ACTION_RESPONSE_PACKET;
 	}
 }

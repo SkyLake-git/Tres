@@ -3,7 +3,9 @@ package tres;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import tres.client.ui.WorldUtils;
 
 abstract public class ScreenSequence extends ScreenAdapter {
 
@@ -11,8 +13,8 @@ abstract public class ScreenSequence extends ScreenAdapter {
 
 	protected TresApplication game;
 
-	public ScreenSequence(TresApplication game, Viewport viewport) {
-		this.stage = new Stage(viewport);
+	public ScreenSequence(TresApplication game) {
+		this.stage = new Stage(new FitViewport(WorldUtils.WIDTH, WorldUtils.HEIGHT));
 		this.game = game;
 
 

@@ -13,6 +13,10 @@ public class Rank {
 		this.place = place;
 	}
 
+	public static Rank read(PacketDecoder in) throws IOException {
+		return new Rank(in.readInt());
+	}
+
 	public int getPlace() {
 		return place;
 	}
@@ -23,9 +27,5 @@ public class Rank {
 
 	public void write(PacketEncoder out) throws IOException {
 		out.writeInt(this.place);
-	}
-
-	public static Rank read(PacketDecoder in) throws IOException {
-		return new Rank(in.readInt());
 	}
 }

@@ -4,7 +4,10 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * Tres Application encrypting system.
@@ -13,9 +16,11 @@ import java.security.*;
 public class PublicKeyNetworkCipher extends NetworkCipher {
 
 	protected Cipher encryptCipher;
+
 	protected Cipher decryptCipher;
 
 	protected PublicKey publicKey;
+
 	protected PrivateKey privateKey;
 
 	public PublicKeyNetworkCipher(PublicKey publicKey, PrivateKey privateKey) {
@@ -47,7 +52,7 @@ public class PublicKeyNetworkCipher extends NetworkCipher {
 
 	@Override
 	public byte[] encrypt(byte[] data) throws CryptoException {
-		if (this.encryptCipher == null){
+		if (this.encryptCipher == null) {
 			throw new CryptoException("Encrypt not supported: Public Key not provided");
 		}
 
@@ -60,7 +65,7 @@ public class PublicKeyNetworkCipher extends NetworkCipher {
 
 	@Override
 	public byte[] decrypt(byte[] data) throws CryptoException {
-		if (this.decryptCipher == null){
+		if (this.decryptCipher == null) {
 			throw new CryptoException("Decrypt not supported: Private Key not provided");
 		}
 

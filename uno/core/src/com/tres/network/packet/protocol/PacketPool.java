@@ -39,6 +39,11 @@ public class PacketPool {
 		this.register(new CardListPacket());
 		this.register(new GameResultPacket());
 		this.register(new PlayerGameActionPacket());
+		this.register(new FileChunkDataPacket());
+		this.register(new FileChunkStreamPacket());
+		this.register(new FileChunkStreamResponsePacket());
+		this.register(new FileStreamRequestPacket());
+		this.register(new FileStreamResultPacket());
 	}
 
 	public void register(DataPacket packet) {
@@ -55,7 +60,7 @@ public class PacketPool {
 			try {
 				return this.pool.get(id).newInstance();
 			} catch (InvocationTargetException | InstantiationException |
-					 IllegalAccessException e) {
+			         IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
 		}

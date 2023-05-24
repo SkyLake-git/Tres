@@ -1,6 +1,7 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -17,12 +18,12 @@ public class RequestAvailableGamesPacket extends DataPacket implements Serverbou
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "RequestAvailableGamesPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.REQUEST_AVAILABLE_GAMES_PACKET;
 	}
 }

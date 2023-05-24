@@ -1,18 +1,16 @@
 package tres.client.ui.actor;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.crashinvaders.vfx.VfxManager;
-import com.crashinvaders.vfx.effects.BloomEffect;
 import com.crashinvaders.vfx.effects.ChainVfxEffect;
 import com.tres.network.uno.Card;
 import tres.client.ui.CardTextures;
 
-public class CardActor extends Actor {
+public class CardActor extends Entity {
 
 	protected Texture texture;
 
@@ -28,18 +26,55 @@ public class CardActor extends Actor {
 
 	protected Card card;
 
-	public CardActor(Card card) {
-		this.card = card;
-		this.texture = CardTextures.MAP.get(CardTextures.getIndex(card.symbol, card.color));
-		this.setBounds(0, 0, this.texture.getWidth(), this.texture.getHeight());
-		this.vfx = new VfxManager(Pixmap.Format.RGBA8888);
+	protected Texture cardTexture;
 
-		this.effect = new BloomEffect();
-		this.vfx.addEffect(effect);
+	protected Color lastRecreateColor;
+
+	public CardActor(Card card) {
+		super();
+		this.card = card;
+		this.cardTexture = CardTextures.MAP.get(CardTextures.getIndex(card.symbol, card.color));
+		this.recreateTexture(new Color());
+		this.setBounds(0, 0, this.texture.getWidth(), this.texture.getHeight());
+
+		this.setColor(new Color());
+		this.isSelected = false;
+		this.isHit = false;
+		this.selectedTime = 0;
+	}
+
+	public CardActor() {
+		super();
+		this.card = null;
+		this.cardTexture = CardTextures.BACK;
+		this.recreateTexture(new Color());
+		this.setBounds(0, 0, this.texture.getWidth(), this.texture.getHeight());
+		this.setColor(new Color());
 
 		this.isSelected = false;
 		this.isHit = false;
 		this.selectedTime = 0;
+	}
+
+	protected void recreateTexture(Color tintColor) {
+		if (this.texture != null) this.texture.dispose();
+		Pixmap pixmap = new Pixmap(cardTexture.getWidth(), cardTexture.getHeight(), Pixmap.Format.RGBA8888);
+
+		this.cardTexture.getTextureData().prepare();
+		Pixmap consume = this.cardTexture.getTextureData().consumePixmap();
+		pixmap.drawPixmap(consume, 0, 0);
+
+
+		pixmap.setColor(tintColor);
+		pixmap.fillRectangle(0, 0, pixmap.getWidth(), pixmap.getHeight());
+
+		this.texture = new Texture(pixmap);
+
+		pixmap.dispose();
+		this.cardTexture.getTextureData().disposePixmap();
+		consume.dispose();
+
+		this.lastRecreateColor = this.getColor().cpy();
 	}
 
 	public Card getCard() {
@@ -54,6 +89,10 @@ public class CardActor extends Actor {
 	public void draw(Batch batch, float parentAlpha) {
 		float x = getX();
 		float y = getY();
+
+		if (!this.lastRecreateColor.equals(this.getColor())) {
+			this.recreateTexture(this.getColor());
+		}
 
 		if (this.isSelected) {
 			y += 50 * Math.min(1, this.selectedTime / 0.225f);
@@ -76,6 +115,10 @@ public class CardActor extends Actor {
 		return isHit;
 	}
 
+	public void setHit(boolean hit) {
+		isHit = hit;
+	}
+
 	public boolean isSelected() {
 		return isSelected;
 	}
@@ -88,9 +131,6 @@ public class CardActor extends Actor {
 	public void act(float delta) {
 		super.act(delta);
 
-		Vector2 mousePosLocal = this.screenToLocalCoordinates(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-		this.isHit = this.hit(mousePosLocal.x, mousePosLocal.y, true) != null;
-
 		if (this.isSelected) {
 			this.selectedTime += delta;
 		} else {
@@ -101,8 +141,6 @@ public class CardActor extends Actor {
 	@Override
 	public boolean remove() {
 		if (super.remove()) {
-			this.vfx.dispose();
-			this.effect.dispose();
 			return true;
 		}
 
@@ -112,5 +150,11 @@ public class CardActor extends Actor {
 	@Override
 	public Actor hit(float x, float y, boolean touchable) {
 		return super.hit(x, y, touchable);
+	}
+
+
+	@Override
+	protected void init() {
+
 	}
 }

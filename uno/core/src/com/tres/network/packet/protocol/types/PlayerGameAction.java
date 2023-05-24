@@ -8,9 +8,13 @@ import java.io.IOException;
 abstract public class PlayerGameAction {
 
 	public static final int PLAY_CARD = 0;
+
 	public static final int DRAW_CARD = 1;
+
 	public static final int SKIP_TURN = 2;
+
 	public static final int SHOUT_UNO = 3;
+
 	public static final int UNO_ACCUSATION = 4;
 
 	protected abstract void writeContent(PacketEncoder out) throws IOException;

@@ -3,18 +3,29 @@ package tres.client.ui.actor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
-abstract public class Entity extends Actor {
+abstract public class Entity extends Actor implements DynamicTextureActor {
 	protected Vector2 motion;
 
 	protected double createdTimeMillis;
 
-	public Entity(Vector2 position) {
-		this.setX(position.x);
-		this.setY(position.y);
+	protected boolean isRequestedRedrawTexture;
+
+	public Entity() {
 		this.createdTimeMillis = System.currentTimeMillis();
 		this.motion = new Vector2(0, 0);
+		this.isRequestedRedrawTexture = false;
 
 		this.init();
+	}
+
+	@Override
+	public void requestRedrawTexture() {
+		this.isRequestedRedrawTexture = true;
+	}
+
+	@Override
+	public boolean isRequestedRedrawTexture() {
+		return this.isRequestedRedrawTexture;
 	}
 
 	abstract protected void init();

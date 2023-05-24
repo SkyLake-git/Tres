@@ -10,7 +10,7 @@ public class StartupScreen extends ScreenSequence {
 	protected OrthographicCamera camera;
 
 	public StartupScreen(TresApplication game, Viewport viewport) {
-		super(game, viewport);
+		super(game);
 	}
 
 	@Override

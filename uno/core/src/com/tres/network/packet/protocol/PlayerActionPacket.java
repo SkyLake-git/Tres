@@ -3,6 +3,7 @@ package com.tres.network.packet.protocol;
 import com.tres.network.packet.*;
 import com.tres.network.packet.protocol.types.PlayerAction;
 import com.tres.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -35,12 +36,12 @@ public class PlayerActionPacket extends DataPacket implements Serverbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "PlayerActionPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.PLAYER_ACTION_PACKET;
 	}
 }

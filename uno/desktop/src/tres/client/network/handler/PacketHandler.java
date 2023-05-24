@@ -16,6 +16,8 @@ public interface PacketHandler {
 
 	void handleGameEvent(GameEventPacket packet);
 
+	void handleGameLevel(GameLevelPacket packet);
+
 	void handleServerToClientHandshake(ServerToClientHandshakePacket packet);
 
 	void handlePlayerGameAction(PlayerGameActionPacket packet);
@@ -23,4 +25,16 @@ public interface PacketHandler {
 	void handleGameResult(GameResultPacket packet);
 
 	void handleCardTransaction(CardTransactionPacket packet);
+
+	void handleCardList(CardListPacket packet);
+
+	void handleFileChunkData(FileChunkDataPacket packet);
+
+	void handleFileChunkStream(FileChunkStreamPacket packet);
+
+	void handleAddPlayer(AddPlayerPacket packet);
+
+	void handleRemovePlayer(RemovePlayerPacket packet);
+
+	void handleAvailableGames(AvailableGamesPacket packet);
 }

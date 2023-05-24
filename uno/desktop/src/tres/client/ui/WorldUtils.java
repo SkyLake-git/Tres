@@ -8,9 +8,11 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 public class WorldUtils {
 
 	public static int WIDTH = 1920;
+
 	public static int HEIGHT = 1080;
 
 	public static float RATIO_W = 16f;
+
 	public static float RATIO_H = 9f;
 
 	public static float getHeightFromWidth(float width) {
@@ -22,7 +24,7 @@ public class WorldUtils {
 		ScreenViewport viewport = (new ScreenViewport());
 		viewport.setCamera(beforeViewport.getCamera());
 		viewport.update((int) beforeViewport.getCamera().viewportWidth, (int) beforeViewport.getCamera().viewportHeight, false);
-		
+
 		batch.begin();
 		callback.run();
 		beforeViewport.apply();

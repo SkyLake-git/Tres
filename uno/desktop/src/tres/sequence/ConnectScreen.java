@@ -10,8 +10,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import tres.DesktopLauncher;
 import tres.ScreenSequence;
 import tres.TresApplication;
-import tres.client.AbsoluteDrawer;
-import tres.client.ui.actor.BorderlessButtonActor;
+import tres.client.ui.actor.SimpleButtonActor;
 import tres.client.ui.actor.SimpleTextField;
 import tres.client.ui.actor.TextActor;
 import tres.client.ui.layout.Layout;
@@ -24,32 +23,31 @@ public class ConnectScreen extends ScreenSequence {
 
 	protected OrthographicCamera camera;
 
-	protected AbsoluteDrawer absoluteDrawer;
 
-	protected BorderlessButtonActor connectButton;
+	protected SimpleButtonActor connectButton;
 
 
 	protected Layout ipLayout;
+
 	protected SimpleTextField addressField;
 
 	protected SimpleTextField portField;
 
 	public ConnectScreen(TresApplication game, Viewport viewport) {
-		super(game, viewport);
+		super(game);
 	}
 
 	@Override
 	protected void init() {
-		this.absoluteDrawer = new AbsoluteDrawer();
 		this.camera = new OrthographicCamera(getViewport().getScreenWidth(), getViewport().getScreenHeight());
 		//this.stage.setDebugUnderMouse(true);
-		this.connectButton = new BorderlessButtonActor(
+		this.connectButton = new SimpleButtonActor(
 				new Vector2(0, -120),
-				new BorderlessButtonActor.Button(
+				new SimpleButtonActor.Button(
 						"Connect",
 						400,
 						60,
-						new Color(0, 0.0f, 0, 1),
+						null,
 						1
 				)
 		);
@@ -74,6 +72,9 @@ public class ConnectScreen extends ScreenSequence {
 				new Color(1f, 1f, 1f, 1f)
 		);
 
+		this.addressField.setText("localhost");
+		this.portField.setText("34560");
+
 		this.ipLayout.add(this.addressField);
 		this.ipLayout.add(this.portField);
 
@@ -92,9 +93,6 @@ public class ConnectScreen extends ScreenSequence {
 		this.stage.act(delta);
 		this.stage.draw();
 
-		this.absoluteDrawer.act(delta);
-		this.absoluteDrawer.draw();
-
 		if (this.connectButton.isPressed()) {
 
 			this.connectButton.setDisabled(true);
@@ -108,6 +106,7 @@ public class ConnectScreen extends ScreenSequence {
 
 
 			} catch (IOException e) {
+				e.printStackTrace();
 
 				TextActor actor = TextActor.annotation(this.connectButton, "Failed to connect", new BitmapFont());
 				actor.setDuration(3);
@@ -123,8 +122,6 @@ public class ConnectScreen extends ScreenSequence {
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
-
-		this.absoluteDrawer.refreshBatch();
 	}
 
 	@Override

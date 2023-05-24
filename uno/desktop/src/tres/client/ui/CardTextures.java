@@ -12,8 +12,10 @@ public class CardTextures {
 	public static final HashMap<Integer, Texture> MAP = new HashMap<>();
 
 	public static final int WIDTH = 161;
+
 	public static final int HEIGHT = 266;
 
+	public static Texture BACK;
 
 	public static int getIndex(Card.Symbol symbol, Card.Color color) {
 		return symbol.hashCode() + color.hashCode();
@@ -45,6 +47,8 @@ public class CardTextures {
 		if (MAP.size() > 0) {
 			return;
 		}
+
+		BACK = new Texture(Gdx.files.internal("card/card_back.png"));
 
 		for (Card.Symbol symbol : Card.Symbol.values()) {
 			for (Card.Color color : Card.Color.values()) {

@@ -1,12 +1,14 @@
 package com.tres.network.packet.protocol;
 
 import com.tres.network.packet.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
 public class AddPlayerPacket extends DataPacket implements Clientbound {
 
 	public PlayerInfo info;
+
 	public short runtimeId;
 
 	@Override
@@ -22,12 +24,12 @@ public class AddPlayerPacket extends DataPacket implements Clientbound {
 	}
 
 	@Override
-	public String getName() {
+	public @NotNull String getName() {
 		return "AddPlayerPacket";
 	}
 
 	@Override
-	public ProtocolIds getProtocolId() {
+	public @NotNull ProtocolIds getProtocolId() {
 		return ProtocolIds.ADD_PLAYER_PACKET;
 	}
 }

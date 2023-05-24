@@ -7,12 +7,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.Collection;
 
 public class PacketEncoder {
 
-	protected DataOutputStream stream;
 	public ByteArrayOutputStream internalStream;
+
+	protected DataOutputStream stream;
 
 	public PacketEncoder() {
 		this.internalStream = new ByteArrayOutputStream();
@@ -49,6 +50,11 @@ public class PacketEncoder {
 		this.stream.writeBytes(s);
 	}
 
+	public void writeN(byte[] n) throws IOException {
+		this.stream.writeInt(n.length);
+		this.stream.write(n);
+	}
+
 	public void writeDouble(double v) throws IOException {
 		this.stream.writeDouble(v);
 	}
@@ -66,18 +72,18 @@ public class PacketEncoder {
 	}
 
 	public <T> void writeNullable(T v, AbsorbRunnable writer) throws IOException {
-		this.writeIf(v, v != null, writer);
+		this.writeIf(v != null, writer);
 	}
 
 	public void writeNaturalNumber(int v) throws IOException {
-		this.writeIf(v, v >= 0, () -> this.writeInt(v)); // 自然数だが 0を含む (含む、含まないどちらの意見もある)
+		this.writeIf(v >= 0, () -> this.writeInt(v)); // 自然数だが 0を含む (含む、含まないどちらの意見もある)
 	}
 
 	public void writeNaturalNumber(short v) throws IOException {
-		this.writeIf(v, v >= 0, () -> this.writeShort(v));
+		this.writeIf(v >= 0, () -> this.writeShort(v));
 	}
 
-	public <T> void writeIf(T v, boolean ifv, AbsorbRunnable writer) throws IOException {
+	public void writeIf(boolean ifv, AbsorbRunnable writer) throws IOException {
 		this.writeBoolean(ifv);
 
 		if (ifv) {
@@ -91,7 +97,7 @@ public class PacketEncoder {
 		}
 	}
 
-	public <T> void consumeArrayList(ArrayList<T> list, AbsorbConsumer<T> consumer) throws IOException {
+	public <T> void consumeArrayList(Collection<T> list, AbsorbConsumer<T> consumer) throws IOException {
 		this.writeInt(list.size());
 		for (T item : list) {
 			try {

@@ -12,35 +12,6 @@ import java.util.ArrayList;
 
 public class ChatViewerActor extends Actor {
 
-	public static class ChatView {
-		public float fontScale;
-		public Color fontColor;
-		public int maxColumn;
-		public int lines;
-
-		public Color backgroundColor;
-
-		public ChatView(float fontScale, Color fontColor, int maxColumn, int lines, Color backgroundColor) {
-			this.fontScale = fontScale;
-			this.fontColor = fontColor;
-			this.maxColumn = maxColumn;
-			this.lines = lines;
-			this.backgroundColor = backgroundColor;
-		}
-	}
-
-	public static class ChatLog {
-		public CharSequence content;
-		public float duration;
-		public float remain;
-
-		public ChatLog(CharSequence content, int duration) {
-			this.content = content;
-			this.duration = duration;
-			this.remain = duration;
-		}
-	}
-
 	protected BitmapFont font;
 
 	protected ChatView chatView;
@@ -48,7 +19,6 @@ public class ChatViewerActor extends Actor {
 	protected ArrayList<ChatLog> logs;
 
 	protected Texture texture;
-
 
 	public ChatViewerActor(Vector2 position, ChatView chatView) {
 		this.font = new BitmapFont();
@@ -122,5 +92,39 @@ public class ChatViewerActor extends Actor {
 			}
 		}
 
+	}
+
+	public static class ChatView {
+		public float fontScale;
+
+		public Color fontColor;
+
+		public int maxColumn;
+
+		public int lines;
+
+		public Color backgroundColor;
+
+		public ChatView(float fontScale, Color fontColor, int maxColumn, int lines, Color backgroundColor) {
+			this.fontScale = fontScale;
+			this.fontColor = fontColor;
+			this.maxColumn = maxColumn;
+			this.lines = lines;
+			this.backgroundColor = backgroundColor;
+		}
+	}
+
+	public static class ChatLog {
+		public CharSequence content;
+
+		public float duration;
+
+		public float remain;
+
+		public ChatLog(CharSequence content, int duration) {
+			this.content = content;
+			this.duration = duration;
+			this.remain = duration;
+		}
 	}
 }

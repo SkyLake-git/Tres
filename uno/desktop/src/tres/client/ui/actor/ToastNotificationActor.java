@@ -6,29 +6,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 import tres.client.ui.TextureUtils;
 
 public class ToastNotificationActor extends Entity {
-
-	public static class Toast {
-
-		public float width;
-		public float height;
-		public double staySeconds;
-		public Color color;
-
-		public String text;
-
-		public Toast(float width, float height, String text, double staySeconds, Color color) {
-			this.width = width;
-			this.height = height;
-			this.text = text;
-			this.staySeconds = staySeconds;
-			this.color = color;
-		}
-	}
 
 	protected Texture texture;
 
@@ -41,7 +22,7 @@ public class ToastNotificationActor extends Entity {
 	protected String text;
 
 	public ToastNotificationActor(Vector2 position, Toast toast) {
-		super(position);
+		super();
 
 		setPosition(position.x, position.y);
 
@@ -113,5 +94,26 @@ public class ToastNotificationActor extends Entity {
 		Vector2 center = TextureUtils.getCenter(this);
 
 		this.font.draw(batch, this.text, center.x, center.y + 5, 0, Align.center, false);
+	}
+
+	public static class Toast {
+
+		public float width;
+
+		public float height;
+
+		public double staySeconds;
+
+		public Color color;
+
+		public String text;
+
+		public Toast(float width, float height, String text, double staySeconds, Color color) {
+			this.width = width;
+			this.height = height;
+			this.text = text;
+			this.staySeconds = staySeconds;
+			this.color = color;
+		}
 	}
 }

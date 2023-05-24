@@ -1,46 +1,66 @@
 package tres.client.uno;
 
 import com.tres.network.packet.PlayerInfo;
-import com.tres.network.uno.CardInfo;
-import com.tres.network.uno.CardList;
-import com.tres.network.uno.Player;
+import com.tres.network.uno.NetworkCard;
+import com.tres.network.uno.container.FuncDifferenceContainerListener;
+import org.jetbrains.annotations.Nullable;
+import tres.client.ClientSession;
 
-public class ClientPlayer extends Player {
+public class ClientPlayer extends ViewPlayer {
 
-	protected CardList cards;
+	protected ClientSession session;
 
-	protected PlayerCardActions cardActions;
+	protected InGamePlayerData inGameData;
 
-	protected PlayerInfo info;
+	public ClientPlayer(ClientSession session, short runtimeId, PlayerInfo info) {
+		super(runtimeId, info);
 
-	protected String displayName;
+		this.session = session;
+		this.inGameData = null;
 
-	public ClientPlayer(short runtimeId, PlayerInfo info) {
-		super(runtimeId);
-		this.cards = new CardList();
-		this.cardActions = new PlayerCardActions(this);
-		this.info = info;
-		this.displayName = info.getUsername();
+		this.initListener();
 	}
 
-	public PlayerCardActions getCardActions() {
-		return cardActions;
+	private void initListener() {
+		FuncDifferenceContainerListener<NetworkCard> listener = new FuncDifferenceContainerListener<NetworkCard>(
+				(slot, card) -> {
+					this.session.getLogger().info("Client origin container modified");
+					if (!card.hasCardInfo()) {
+						this.session.disconnect("Origin container cards must be send with CardInfo");
+					}
+				},
+				(slot, card) -> {
+					if (!card.hasCardInfo()) {
+						this.session.disconnect("Origin container cards must be send with CardInfo");
+					}
+				}
+		) {
+		};
+
+		listener.listen(this.cards);
 	}
 
-	public String getName() {
-		return this.info.getUsername();
+	public void onJoinGame(int gameId) {
+		if (this.inGameData != null) {
+			return;
+		}
+
+		if (this.session.getActions().getLatestGameLevel() == null) {
+			return;
+		}
+
+		this.inGameData = new InGamePlayerData(this, new ClientGame(gameId, this.session.getActions().getLatestGameLevel().rule.getUnoRule()));
 	}
 
-	public String getDisplayName() {
-		return this.displayName;
+	public void onLeftGame() {
+		this.inGameData = null;
 	}
 
-	@Override
-	public CardInfo getCards() {
-		return (CardInfo) this.cards;
+	public ClientSession getSession() {
+		return session;
 	}
 
-	CardList getCardList() {
-		return (CardList) this.cards;
+	public @Nullable InGamePlayerData getInGameData() {
+		return inGameData;
 	}
 }

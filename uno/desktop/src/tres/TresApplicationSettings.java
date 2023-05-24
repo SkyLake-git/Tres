@@ -6,14 +6,19 @@ import java.awt.*;
 
 public class TresApplicationSettings {
 
+	private final float refreshRate;
+
+	private final int width;
+
+	private final int height;
+
 	protected int foregroundFPS;
 
 	protected boolean vsync;
 
-	private final float refreshRate;
+	protected float sensitivity;
 
-	private final int width;
-	private final int height;
+	protected boolean anonymous;
 
 	public TresApplicationSettings() {
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -30,7 +35,9 @@ public class TresApplicationSettings {
 		this.height = device.getDisplayMode().getHeight();
 
 		this.foregroundFPS = (int) this.refreshRate;
+		this.sensitivity = 1f;
 		this.vsync = false;
+		this.anonymous = false;
 	}
 
 	public int getMonitorHeight() {
@@ -45,10 +52,20 @@ public class TresApplicationSettings {
 		return this.refreshRate;
 	}
 
-	public void setForegroundFPS(int fps) {
-		this.foregroundFPS = fps;
+	public boolean isAnonymous() {
+		return anonymous;
+	}
 
-		Gdx.graphics.setForegroundFPS(fps);
+	public void setAnonymous(boolean anonymous) {
+		this.anonymous = anonymous;
+	}
+
+	public float getSensitivity() {
+		return sensitivity;
+	}
+
+	public void setSensitivity(float sensitivity) {
+		this.sensitivity = sensitivity;
 	}
 
 	public void useVsync(boolean vsync) {
@@ -62,5 +79,11 @@ public class TresApplicationSettings {
 
 	public int getForegroundFPS() {
 		return foregroundFPS;
+	}
+
+	public void setForegroundFPS(int fps) {
+		this.foregroundFPS = fps;
+
+		Gdx.graphics.setForegroundFPS(fps);
 	}
 }

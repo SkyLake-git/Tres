@@ -7,15 +7,10 @@ import com.badlogic.gdx.utils.Align;
 
 public class TextActor extends Actor {
 
-	public static TextActor annotation(Actor base, CharSequence text, BitmapFont font) {
-		TextActor actor = new TextActor(text, font);
-		actor.setPosition(base.getX(), base.getY() + 2, Align.topLeft);
-		return actor;
-	}
-
 	protected CharSequence text;
 
 	protected BitmapFont font;
+
 	protected float duration;
 
 	public TextActor(CharSequence text, BitmapFont font) {
@@ -28,6 +23,12 @@ public class TextActor extends Actor {
 		this.text = text;
 		this.font = font;
 		this.duration = duration;
+	}
+
+	public static TextActor annotation(Actor base, CharSequence text, BitmapFont font) {
+		TextActor actor = new TextActor(text, font);
+		actor.setPosition(base.getX(), base.getY() + 2, Align.topLeft);
+		return actor;
 	}
 
 	@Override
@@ -53,12 +54,12 @@ public class TextActor extends Actor {
 		return text;
 	}
 
-	public BitmapFont getFont() {
-		return font;
-	}
-
 	public void setText(CharSequence text) {
 		this.text = text;
+	}
+
+	public BitmapFont getFont() {
+		return font;
 	}
 
 	public float getDuration() {
