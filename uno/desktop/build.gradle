@@ -89,8 +89,11 @@ task createResource {
         String json = jsonBuilder.toPrettyString()
 
         String base = sourceSets.main.resources.srcDirs[0] as String
+
+        File file = new File(base + "/build_info.json")
         // リソースファイルとして保存
-        new File(base + "/build_info.json").write(json)
+        file.createNewFile()
+        file.write(json)
     }
 }
 
