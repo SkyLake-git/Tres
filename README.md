@@ -15,3 +15,6 @@ Windows向けに作成していますが、おそらくこれらのOSでも動�
 
 ### サポート予定
 Browser
+
+### 開発者向け
+ビルド情報: `tres.jar/build_info.json`
